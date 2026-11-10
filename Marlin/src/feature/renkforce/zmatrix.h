@@ -52,7 +52,8 @@ public:
   static bool save(const uint8_t slot);
   static bool save_active() { return save(active); }   // after G29
   static void clear(const uint8_t slot);   // M3011
-  static void report(const bool in_mm);    // M3013
+  static void report(const bool in_mm);    // current Marlin grid (fallback)
+  static bool report_slot(const uint8_t slot, const bool in_mm);   // M3013 [S] [P]: stored matrix like RF Repetier
 };
 
 extern RFZMatrix rf_zmatrix;

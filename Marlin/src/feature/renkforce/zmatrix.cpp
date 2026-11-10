@@ -258,6 +258,53 @@ void RFZMatrix::clear(const uint8_t slot) {
   SERIAL_ECHOLNPGM("Z-Matrix ", slot, " geloescht");
 }
 
+//
+// M3013 [S<slot>] [P1]: stored matrix of the slot like RF Repetier outputCompensationMatrix()
+// (front left first, header row X [mm], header column Y [mm], values in steps or with P1 in mm)
+//
+bool RFZMatrix::report_slot(const uint8_t slot, const bool in_mm) {
+  if (!WITHIN(slot, 1, RF_ZMATRIX_SLOTS) || !present) return false;
+  const uint16_t base = sector(slot);
+  int16_t hfmt, sfmt, dx, dy, ms;
+  if (!ee_read_word(ZM_HDR_FORMAT, hfmt) || !ee_read_word(base + ZM_SEC_FORMAT, sfmt)
+      || !ee_read_word(base + ZM_SEC_DIM_X, dx) || !ee_read_word(base + ZM_SEC_DIM_Y, dy)
+      || !ee_read_word(base + ZM_SEC_MICROSTEPS, ms)) return false;
+  if (hfmt != ZM_FORMAT || sfmt != ZM_FORMAT || !WITHIN(dx, 2, ZM_MAX_DIM) || !WITHIN(dy, 2, ZM_MAX_DIM)) {
+    SERIAL_ECHOLNPGM("M3013: Z-Matrix ", slot, " ist leer oder ungueltig");
+    return true;
+  }
+  // steps of the matrix were stored with "ms" Z micro steps
+  const uint16_t ms_now = rf.settings.drv_microsteps[RF_DRV_Z];
+  const float spm = z_steps_per_mm() * (ms > 0 ? float(ms) / ms_now : 1.0f);
+  int16_t vmin = 32767, vmax = -32768;
+  SERIAL_ECHOLNPGM("front left ... front right");
+  SERIAL_ECHOLNPGM("...        ...         ...");
+  SERIAL_ECHOLNPGM("back left  ...  back right");
+  for (uint8_t y = 0; y <= dy; ++y) {
+    for (uint8_t x = 0; x <= dx; ++x) {
+      int16_t v;
+      if (!ee_read_word(cell(slot, x, y, dy), v)) { SERIAL_EOL(); return false; }
+      SERIAL_CHAR(';');
+      if (x == 0 || y == 0 || !in_mm) SERIAL_ECHO(v);
+      else SERIAL_ECHO_F(v / spm, 3);
+      if (x && y) { NOMORE(vmin, v); NOLESS(vmax, v); }
+    }
+    SERIAL_ECHOLNPGM(" ");
+    idle();
+  }
+  SERIAL_ECHOPGM("offset = ", vmax, " [steps] (= ");
+  SERIAL_ECHO_F(vmax / spm, 3);
+  SERIAL_ECHOLNPGM(" [mm])");
+  SERIAL_ECHOPGM("warpage = ", vmin - vmax, " [steps] (= ");
+  SERIAL_ECHO_F((vmin - vmax) / spm, 3);
+  SERIAL_ECHOLNPGM(" [mm])");
+  SERIAL_ECHOLNPGM("g_uZMatrixMax[X_AXIS] = ", dx);
+  SERIAL_ECHOLNPGM("g_uZMatrixMax[Y_AXIS] = ", dy);
+  SERIAL_ECHOLNPGM("Z-Mikroschritte der Matrix = ", ms, " (jetzt ", ms_now, ")");
+  SERIAL_ECHOLNPGM("g_nActiveHeatBed = ", active, ", Kompensation ", planner.leveling_active ? 1 : 0);
+  return true;
+}
+
 void RFZMatrix::report(const bool in_mm) {
   // Output of the current grid in the layout of RF Repetier M3013 (front left first)
   if (!bedlevel.has_mesh()) { SERIAL_ECHOLNPGM("keine Z-Matrix"); return; }

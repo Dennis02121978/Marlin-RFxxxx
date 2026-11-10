@@ -28,7 +28,7 @@
  *   - move down in 0.004 mm steps until the pressure is back within idle +-5 digits
  *   - move up in 0.004 mm steps until contact again
  *   - move down in single steps until idle +-5 digits again  ->  this Z is the value of the point
- *   - move the bed down 0.1 mm and go to the next point (serpentine, X outer, Y inner)
+ *   - move the bed down RF_SCAN_CLEARANCE_MM (0.3 mm, RF Repetier 0.1 mm) and go to the next point (serpentine, X outer, Y inner)
  *   Errors (Z out of range, bed too uneven, no constant pressure) retry the point up to 5 times:
  *   lift, home Y, home Z, return to the point, read the idle pressure again.
  *
@@ -59,7 +59,10 @@
 // ---- RF Repetier RF2000.h / RF1000.h / RF2000v2.h ----------------------------------------------
 #define HBS_Z_START_MM          1.0f     // HEAT_BED_SCAN_Z_START_MM
 #define HBS_UP_FAST_MM          0.02f    // HEAT_BED_SCAN_UP_FAST_MM
-#define HBS_DOWN_FAST_MM        0.1f     // HEAT_BED_SCAN_DOWN_FAST_MM
+#define HBS_DOWN_FAST_MM        0.1f     // HEAT_BED_SCAN_DOWN_FAST_MM (limits "too uneven" / "step delta")
+#ifndef RF_SCAN_CLEARANCE_MM
+  #define RF_SCAN_CLEARANCE_MM  0.3f     // bed down after each point before moving to the next one
+#endif
 #define HBS_UP_SLOW_MM          0.004f   // HEAT_BED_SCAN_UP_SLOW_MM
 #define HBS_DOWN_SLOW_MM        0.004f   // HEAT_BED_SCAN_DOWN_SLOW_MM
 #define HBS_SLOW_STEP_DELAY_MS  100      // HEAT_BED_SCAN_SLOW_STEP_DELAY_MS
@@ -229,7 +232,7 @@ namespace {
   // moveZPlusDownFast
   bool down_fast() {
     last_z = zsteps; has_last = true;
-    zmove(mm_steps(HBS_DOWN_FAST_MM));
+    zmove(mm_steps(RF_SCAN_CLEARANCE_MM));   // RF Repetier: 0.1 mm
     int16_t p;
     return read_avg(p);
   }
@@ -443,7 +446,7 @@ void Renkforce::heatbed_scan(const uint8_t mode) {
   heaters_off();
   rf_zmatrix.save_active();
   set_bed_leveling_enabled(true);
-  rf_zmatrix.report(false);
+  rf_zmatrix.report_slot(rf_zmatrix.active, true);
   SERIAL_ECHOLNPGM("HBS: fertig in ", (millis() - t0) / 60000UL, " min");
   ui.set_status(F("Heizbett Scan fertig"));
   BUZZ(100, 2000);
@@ -476,7 +479,7 @@ void Renkforce::z_offset_scan() {
   retries = ZOS_RETRIES;
   for (;;) {
     int16_t p;
-    if (!read_idle(p)) { if (aborted || !retries--) break; wait_ms(HBS_DELAY_MS); zmove(mm_steps(HBS_DOWN_FAST_MM)); continue; }
+    if (!read_idle(p)) { if (aborted || !retries--) break; wait_ms(HBS_DELAY_MS); zmove(mm_steps(RF_SCAN_CLEARANCE_MM)); continue; }
     limits(p, ZOS_CONTACT_DELTA, ZOS_RETRY_DELTA);
     // state 10: fast up, back up to 2 fast steps, the pressure must change
     const int32_t old_z = zsteps;

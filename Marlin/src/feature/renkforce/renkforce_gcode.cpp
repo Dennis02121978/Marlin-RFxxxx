@@ -26,7 +26,7 @@
  *  M3000 / M3001             Z compensation (bed leveling) off / on
  *  M3002 [T1]                read the load cell (T1: set the zero point now)
  *  M3010 [S]                 heat bed scan like RF Repetier (S1 PLA, S2 ABS), also G29
- *  M3013                     print the Z compensation matrix (M420 V)
+ *  M3013 [S] [P1]            print matrix S (default active) like RF Repetier, P1 = in mm
  *  M3050 [S]                 probe: contact pressure delta in digits
  *  M3060                     device type and firmware version
  *  M3070                     pause the print like the Pause key
@@ -136,7 +136,14 @@ bool rf_process_mcode(const uint16_t code) {
         if (!WITHIN(s, 1, RF_ZMATRIX_SLOTS)) { SERIAL_ECHOLNPGM("M3011: ungueltige Matrix (1..", RF_ZMATRIX_SLOTS, ")"); break; }
         rf_zmatrix.clear(s);
       } break;
-      case 3013: rf_zmatrix.report(parser.boolval('S')); break;   // S1 = mm, else steps
+      case 3013: {   // M3013 [S<1..9>] [P1] - like RF Repetier: S = matrix slot (default active), P1 = values in mm
+        const uint8_t slot = parser.byteval('S', rf_zmatrix.active);
+        const bool mm = parser.boolval('P');
+        if (!rf_zmatrix.report_slot(slot, mm)) {
+          if (!parser.seen('S')) rf_zmatrix.report(mm);   // no EEPROM: current grid
+          else SERIAL_ECHOLNPGM("M3013: ungueltige Matrix ", slot);
+        }
+      } break;
       case 3014: rf_zmatrix.save(parser.seenval('S') ? parser.value_byte() : rf_zmatrix.active); break;   // store the current grid
     #endif
 

@@ -42,7 +42,7 @@ Serielle Verbindung 115200 Baud. `python3 rf_tools/build_all.py` baut alle 6 Var
 - **externes I2C-EEPROM 24C256 (0x50):** Heizbett-Matrizen **wie bei Repetier** (Format 7, 9 Plätze à 1536 Bytes,
   aktiver Platz im Kopf). Beide Firmwares lesen die Matrizen des jeweils anderen.
   - Beim Start wird die aktive Matrix geladen und auf das Marlin-Raster umgerechnet.
-  - `M3009 S<1..9>` Platz wählen und laden, `M3011 [S]` löschen, `M3013` ausgeben (`S1` = mm),
+  - `M3009 S<1..9>` Platz wählen und laden, `M3011 [S]` löschen, `M3013 [S<Platz>] [P1]` ausgeben wie Repetier (`P1` = mm),
     `M3014 [S]` speichern, `M3000`/`M3001` Kompensation aus/an.
 - `M3060` prüft, ob 0x49 (DMS), 0x50 und 0x51 antworten.
 
@@ -52,7 +52,7 @@ Serielle Verbindung 115200 Baud. `python3 rf_tools/build_all.py` baut alle 6 Var
 - Raster ab X 15 / Y 30 (ab Y-Schalter) alle 20 mm bis 5 mm vor Achsende, Schlangenlinie.
   RF2000: 10 × 11 Punkte, RF2000 v2: 10 × 14. Das Marlin-Mesh ist genau dieses Raster.
 - Je Punkt: Leerlaufdruck messen, Bett in 0,02-mm-Schritten hoch bis ±10 Digits, in 0,004-mm-Schritten zurück
-  bis ±5 Digits, wieder 0,004 mm hoch bis Kontakt, in Einzelschritten zurück bis ±5 Digits → Wert. Danach 0,1 mm runter.
+  bis ±5 Digits, wieder 0,004 mm hoch bis Kontakt, in Einzelschritten zurück bis ±5 Digits → Wert. Danach 0,3 mm runter (`RF_SCAN_CLEARANCE_MM`, Repetier 0,1 mm) und zum nächsten Punkt.
 - Fehler (Z außerhalb, Bett zu uneben, Druck nicht konstant): bis zu 5 Wiederholungen.
 - Ergebnis im Repetier-Format in den aktiven Platz des 24C256, Kompensation an.
 - `M3010 S1` PLA / `S2` ABS: Bett 60/100 °C, Düse 100 °C, 10 min warten, scannen, dann Düse 210/240 °C,

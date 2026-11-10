@@ -4299,6 +4299,7 @@
   #define RF_LOADCELL_IDLE_MAX     7500   // RF Repetier HEAT_BED_SCAN_IDLE_PRESSURE_MAX
   #define RF_LOADCELL_TARE_SAMPLES    4   // samples for the zero point before each probe
   #define RF_LOADCELL_SETTLE_MS     250   // wait before the zero point (RF Repetier HEAT_BED_SCAN_IDLE_DELAY_MS)
+  #define RF_SCAN_CLEARANCE_MM     0.3   // heat bed scan: bed down after each point before moving on (RF Repetier 0.1)
 
   // Emergency pause (M3075): pause when the averaged force is outside MIN..MAX digits. 0 = off.
   #ifndef RF_EMERGENCY_PAUSE_MIN
