@@ -108,8 +108,8 @@
  * after homing), so both nozzles reach X 0..RF_X_MAX.
  *
  *              X single  X dual  Y    Z    Z below switch  T1 offset X / Y
- *   RF1000       245      180   245  200       0.8            33.9 / 0.1
- *   RF2000       230      180   245  200       1.3            33.9 / 0.1
+ *   RF1000       245      200   245  200       0.8            33.9 / 0.1
+ *   RF2000       230      200   245  200       1.3            33.9 / 0.1
  *   RF2000 v2    230      170   290  185       3.0            33.6 / 0.0
  */
 #define RF_MODEL_RF1000   1
@@ -144,7 +144,7 @@
   #define RF_IS_RF1000
   #define RF_MACHINE_NAME "RF1000"
   #ifndef RF_X_MAX
-    #define RF_X_MAX   TERN(RF_DUAL_EXTRUDER, 180, 245)
+    #define RF_X_MAX   TERN(RF_DUAL_EXTRUDER, 200, 245)
   #endif
   #ifndef RF_Y_MAX
     #define RF_Y_MAX   245
@@ -161,7 +161,7 @@
   #define RF_IS_RF2000
   #define RF_MACHINE_NAME "RF2000"
   #ifndef RF_X_MAX
-    #define RF_X_MAX   TERN(RF_DUAL_EXTRUDER, 180, 230)
+    #define RF_X_MAX   TERN(RF_DUAL_EXTRUDER, 200, 230)
   #endif
   #ifndef RF_Y_MAX
     #define RF_Y_MAX   245

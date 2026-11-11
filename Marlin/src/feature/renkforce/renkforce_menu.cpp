@@ -92,7 +92,7 @@ static void save_now() { if (!printingIsActive()) settings.save(); }   // AVR: o
 
 #if PIN_EXISTS(RF_RGB_R)
   static FSTR_P rgb_label() {
-    if (rf_rgb.force_white) return F("RGB Licht: Weiss *");
+    if (rf_rgb.force_white) return F("RGB Licht: Weiss (T)");
     switch (rf.settings.rgb_mode) {
       case RF_RGB_OFF:    return F("RGB Licht: Aus");
       case RF_RGB_WHITE:  return F("RGB Licht: Weiss");
@@ -159,9 +159,9 @@ static void menu_rf_position() {
   START_MENU();
   BACK_ITEM_F(F("Hauptmenü"));
   GCODES_ITEM_F(F("Home alle"), FPSTR(G28_STR));
-  GCODES_ITEM_F(axis_is_trusted(X_AXIS) ? F("Home X *") : F("Home X"), F("G28 X"));
-  GCODES_ITEM_F(axis_is_trusted(Y_AXIS) ? F("Home Y *") : F("Home Y"), F("G28 Y"));
-  GCODES_ITEM_F(axis_is_trusted(Z_AXIS) ? F("Home Z *") : F("Home Z"), F("G28 Z"));
+  GCODES_ITEM_F(axis_is_trusted(X_AXIS) ? F("Home X ok") : F("Home X"), F("G28 X"));
+  GCODES_ITEM_F(axis_is_trusted(Y_AXIS) ? F("Home Y ok") : F("Home Y"), F("G28 Y"));
+  GCODES_ITEM_F(axis_is_trusted(Z_AXIS) ? F("Home Z ok") : F("Home Z"), F("G28 Z"));
   SUBMENU_F(F("Achsen bewegen"), menu_move);
   END_MENU();
 }
