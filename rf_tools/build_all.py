@@ -32,7 +32,7 @@ Flashen (Host wie Repetier-Server, OctoPrint oder Klipper vorher stoppen):
   Windows: XLoader oder Cura (Firmware aktualisieren, Benutzerdefiniert), 115200 Baud.
 
 Nach dem ersten Start: M500, dann Heizbett-Scan M3010 mit Aufsicht und M3001.
-Host-Verbindung: 115200 Baud, Firmware Marlin.
+Host-Verbindung: 250000 Baud (bis v1.0.3: 115200), Firmware Marlin.
 
 Koordinaten wie Repetier: X=0, Y=0, Z=0 sind die Schalter. Im Slicer (Orca) G-Code Marlin 2,
 Druckbett-Nullpunkt Y = -Ueberstand der Duese vor dem Bett (z. B. -22), Tiefe = Y max - Ueberstand.

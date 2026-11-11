@@ -34,8 +34,9 @@ bool RF_DRV8711::initialized; // = false
  *
  * RF_DRV8711_LESS_NOISE = RF Repetier FEATURE_STEPPER_LESS_NOISE (shorter off time and
  * auto mixed decay). Note: RF Repetier writes 0xB2D7 for register 3 in this mode. Bit 15 set
- * makes that a READ command, so the drivers kept their reset value. Here register 3 always
- * gets the original value 0x1D7 (TBLANK 4.3 us, adaptive blanking on).
+ * makes that a READ command, so the drivers kept their reset value (TBLANK 2.56 us, ABT off).
+ * Here register 3 gets 0x180: TBLANK 2.56 us like the TI default plus adaptive blanking (TI datasheet
+ * 8.2.2.4). The original 0x1D7 (4.3 us) showed no measurable difference on the RF2000 (2026-11-11).
  */
 #define DRV_REG0_BASE  0x0E01   // DTIME 850 ns, ISGAIN 20, EXSTALL 0, MODE (bits 6..3), RSTEP 0, RDIR 0, ENBL 1
 #define DRV_REG1_BASE  0x0100   // SMPLTH 100 us, TORQUE in bits 7..0
@@ -46,7 +47,7 @@ bool RF_DRV8711::initialized; // = false
   #define DRV_REG2     0x0097   // TOFF 76 us, PWMMODE 0
   #define DRV_REG4     0x0430   // TDECAY 24 us, DECMOD 100 mixed decay
 #endif
-#define DRV_REG3       0x01D7   // TBLANK 4.3 us, ABT 1
+#define DRV_REG3       0x0180   // TBLANK 2.56 us (TI default 0x80), ABT 1 (TI: adaptive blanking for microstepping)
 #define DRV_REG5       0x083C   // SDTHR 0x3C, SDCNT 00, VDIV 10
 #define DRV_REG6       0x00F0   // OCPTH 250 mV, OCPDEG 1 us, TDRIVEN/P 2 us, IDRIVEN/P lowest
 #define DRV_REG7       0x0000   // clear all status flags

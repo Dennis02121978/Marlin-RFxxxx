@@ -248,7 +248,7 @@
  *
  * :[2400, 9600, 19200, 38400, 57600, 115200, 250000, 500000, 1000000]
  */
-#define BAUDRATE 115200   // RF Repetier and Klipper use 115200 on the FTDI
+#define BAUDRATE 250000   // RF: 250000 (exact on 16 MHz, more short segments/s than 115200); flashing via bootloader stays 115200
 
 //#define BAUD_RATE_GCODE     // Enable G-code M575 to set the baud rate
 

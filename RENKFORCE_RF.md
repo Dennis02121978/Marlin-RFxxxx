@@ -55,7 +55,7 @@ avrdude -patmega2560 -cwiring -P/dev/ttyUSB0 -b115200 -D -Uflash:w:.pio/build/me
 ```
 
 Nach dem ersten Flashen meldet Marlin „EEPROM datasize error“ und lädt Standardwerte; dann `M500`.
-Serielle Verbindung 115200 Baud. `python3 rf_tools/build_all.py` baut alle 6 Varianten nach `rf_release/`.
+Serielle Verbindung zum Host **250000 Baud** (bis v1.0.3: 115200). Flashen über den Bootloader weiter mit 115200. `python3 rf_tools/build_all.py` baut alle 6 Varianten nach `rf_release/`.
 
 **Vor dem Flashen das interne EEPROM sichern**, wenn du zu Repetier zurück willst:
 `avrdude -patmega2560 -cwiring -P/dev/ttyUSB0 -b115200 -Ueeprom:r:eeprom_repetier.hex:i`
