@@ -4289,7 +4289,7 @@
     #define RF_DRV8711_CURRENT    { 1790, 1790, 1709, 1465, 1465 }
   #endif
   #define RF_DRV8711_CURRENT_LIMIT  2440      // mA, RF Repetier MOTOR_CURRENT_MAX 150
-  #define RF_DRV8711_MICROSTEPS { 32, 32, 16, 32, 32 }   // must match DEFAULT_AXIS_STEPS_PER_UNIT
+  #define RF_DRV8711_MICROSTEPS { 16, 16, 16, 32, 32 }   // must match DEFAULT_AXIS_STEPS_PER_UNIT (RF Repetier XY 32: smoother but ~30 kHz at 200 mm/s)
   #define RF_DRV8711_LESS_NOISE           // RF Repetier FEATURE_STEPPER_LESS_NOISE (auto mixed decay)
 
   /**

@@ -1334,7 +1334,7 @@
  * Override with M92
  *                                      X, Y, Z [, I [, J [, K...]]], E0 [, E1[, E2...]]
  */
-#define DEFAULT_AXIS_STEPS_PER_UNIT   { 152.381, 152.381, 1280, RF_E_STEPS }   // microsteps 32 / 32 / 16 / 32 (M350)
+#define DEFAULT_AXIS_STEPS_PER_UNIT   { 76.19, 76.19, 1280, RF_E_STEPS }   // microsteps 16 / 16 / 16 / 32 (M350, menu Konfiguration -> Mikroschritte)
 
 /**
  * Default Max Feed Rate (linear=mm/s, rotational=°/s)

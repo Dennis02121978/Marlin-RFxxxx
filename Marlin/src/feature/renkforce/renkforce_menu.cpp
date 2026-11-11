@@ -343,6 +343,53 @@ static void menu_rf_current() {
   END_MENU();
 }
 
+// Mikroschritte wie RF Repetier (MicroStepXY / MicroStepsZ / MicroStepsE). Schritte/mm werden mitgerechnet,
+// die Position bleibt. Dauerhaft erst mit "Einst. speichern" (M500).
+static void ms_set_xy(const uint16_t ms) { rf.change_microsteps(RF_DRV_X, ms); rf.change_microsteps(RF_DRV_Y, ms); ui.go_back(); }
+static void ms_set_z(const uint16_t ms)  { rf.change_microsteps(RF_DRV_Z, ms); ui.go_back(); }
+static void ms_set_e(const uint16_t ms)  { rf.change_microsteps(RF_DRV_E0, ms); TERN_(DISTINCT_E_FACTORS, rf.change_microsteps(RF_DRV_E1, ms)); ui.go_back(); }
+
+static void menu_rf_ms_xy() {
+  START_MENU();
+  BACK_ITEM_F(F("Mikroschritte"));
+  ACTION_ITEM_F(F("XY 1/8"),  []{ ms_set_xy(8); });
+  ACTION_ITEM_F(F("XY 1/16"), []{ ms_set_xy(16); });
+  ACTION_ITEM_F(F("XY 1/32"), []{ ms_set_xy(32); });
+  ACTION_ITEM_F(F("XY 1/64"), []{ ms_set_xy(64); });
+  END_MENU();
+}
+static void menu_rf_ms_z() {
+  START_MENU();
+  BACK_ITEM_F(F("Mikroschritte"));
+  ACTION_ITEM_F(F("Z 1/8"),  []{ ms_set_z(8); });
+  ACTION_ITEM_F(F("Z 1/16"), []{ ms_set_z(16); });
+  ACTION_ITEM_F(F("Z 1/32"), []{ ms_set_z(32); });
+  END_MENU();
+}
+static void menu_rf_ms_e() {
+  START_MENU();
+  BACK_ITEM_F(F("Mikroschritte"));
+  ACTION_ITEM_F(F("E 1/16"),  []{ ms_set_e(16); });
+  ACTION_ITEM_F(F("E 1/32"),  []{ ms_set_e(32); });
+  ACTION_ITEM_F(F("E 1/64"),  []{ ms_set_e(64); });
+  ACTION_ITEM_F(F("E 1/128"), []{ ms_set_e(128); });
+  END_MENU();
+}
+static void menu_rf_microsteps() {
+  START_MENU();
+  BACK_ITEM_F(F("Konfiguration"));
+  STATIC_ITEM_F(F("XY 1/"), SS_LEFT, i16tostr3left(rf.settings.drv_microsteps[RF_DRV_X]));
+  STATIC_ITEM_F(F("Z  1/"), SS_LEFT, i16tostr3left(rf.settings.drv_microsteps[RF_DRV_Z]));
+  STATIC_ITEM_F(F("E  1/"), SS_LEFT, i16tostr3left(rf.settings.drv_microsteps[RF_DRV_E0]));
+  if (!printingIsActive() && !planner.has_blocks_queued()) {
+    SUBMENU_F(F("XY aendern"), menu_rf_ms_xy);
+    SUBMENU_F(F("Z aendern"), menu_rf_ms_z);
+    SUBMENU_F(F("E aendern"), menu_rf_ms_e);
+  }
+  ACTION_ITEM_F(F("Einst. speichern"), []{ settings.save(); });
+  END_MENU();
+}
+
 static void menu_rf_config() {
   START_MENU();
   BACK_ITEM_F(F("Hauptmenü"));
@@ -357,6 +404,7 @@ static void menu_rf_config() {
     planner.settings.max_feedrate_mm_s[X_AXIS] = planner.settings.max_feedrate_mm_s[Y_AXIS] = m_float;
   });
   SUBMENU_F(F("Motorstrom"), menu_rf_current);
+  SUBMENU_F(F("Mikroschritte"), menu_rf_microsteps);
   #if PIN_EXISTS(RF_RGB_R)
     SUBMENU_F(F("RGB Licht"), menu_rf_rgb);
   #endif

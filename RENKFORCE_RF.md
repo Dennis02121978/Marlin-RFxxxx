@@ -100,7 +100,7 @@ Serielle Verbindung 115200 Baud. `python3 rf_tools/build_all.py` baut alle 6 Var
 
 | Repetier | Marlin |
 |---|---|
-| DRV8711-Treiber (Software-SPI, CS high aktiv) | `drv8711.cpp`, `M906` (mA), `M350`, `M122` |
+| DRV8711-Treiber (Software-SPI, CS high aktiv) | `drv8711.cpp`, `M906` (mA), `M350`, `M122`; Mikroschritte Standard X/Y/Z 16, E 32, im Menü Konfiguration → Mikroschritte änderbar (Schritte/mm werden mitgerechnet, speichern mit „Einst. speichern“) |
 | DMS (ADS1100, 0x49) | `loadcell.cpp`, Werte in Repetier-Digits, `M3002` |
 | Heizbett-Scan, Z-Kompensation, Z-Matrix | `hbscan.cpp`, `zmatrix.cpp` (siehe oben) |
 | `FEATURE_EMERGENCY_PAUSE` | `M3075 L H` → Pause an der Pause-Position (`M3105 X Y Z`) |
