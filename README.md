@@ -68,6 +68,8 @@ G28
 M3001          ; Z-Kompensation an (Matrix aus dem Heizbett-Scan)
 ```
 
+Ist eine Matrix gespeichert, schaltet die Firmware die Z-Kompensation schon beim Start ein (Display: „Kmp“). `M3001` im Start-G-Code schadet nicht, `M3000` schaltet sie ab.
+
 Pause: `M25`, Filamentwechsel: `M600`.
 
 ## Lizenz

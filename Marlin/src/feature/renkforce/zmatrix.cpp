@@ -120,7 +120,11 @@ void RFZMatrix::init() {
   present = ee_read_word(ZM_HDR_FORMAT, fmt);
   if (!present) { SERIAL_ECHOLNPGM("Z-Matrix-EEPROM (0x50) antwortet nicht"); return; }
   if (fmt == ZM_FORMAT && ee_read_word(ZM_HDR_ACTIVE_BED, act) && WITHIN(act, 1, RF_ZMATRIX_SLOTS)) active = act;
-  if (load(active, true)) SERIAL_ECHOLNPGM("Z-Matrix ", active, " aus dem EEPROM geladen");
+  if (load(active, true)) {
+    // Like Klipper (delayed_gcode bed_mesh_init): a stored matrix is active from the start ("Kmp")
+    set_bed_leveling_enabled(true);
+    SERIAL_ECHOLNPGM("Z-Matrix ", active, " aus dem EEPROM geladen, Z-Kompensation an");
+  }
 }
 
 bool RFZMatrix::select(const uint8_t slot) {

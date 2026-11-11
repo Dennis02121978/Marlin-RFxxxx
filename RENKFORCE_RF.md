@@ -41,7 +41,8 @@ Serielle Verbindung 115200 Baud. `python3 rf_tools/build_all.py` baut alle 6 Var
 - **internes EEPROM (4 KB):** Marlin-Einstellungen (`M500`/`M501`).
 - **externes I2C-EEPROM 24C256 (0x50):** Heizbett-Matrizen **wie bei Repetier** (Format 7, 9 Plätze à 1536 Bytes,
   aktiver Platz im Kopf). Beide Firmwares lesen die Matrizen des jeweils anderen.
-  - Beim Start wird die aktive Matrix geladen und auf das Marlin-Raster umgerechnet.
+  - Beim Start wird die aktive Matrix geladen, auf das Marlin-Raster umgerechnet und die Z-Kompensation
+    eingeschaltet (wie Klipper mit `bed_mesh_init`, Display zeigt „Kmp“). Abschalten mit `M3000`.
   - `M3009 S<1..9>` Platz wählen und laden, `M3011 [S]` löschen, `M3013 [S<Platz>] [P1]` ausgeben wie Repetier (`P1` = mm),
     `M3014 [S]` speichern, `M3000`/`M3001` Kompensation aus/an.
 - `M3060` prüft, ob 0x49 (DMS), 0x50 und 0x51 antworten.
