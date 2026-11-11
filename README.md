@@ -12,7 +12,9 @@ DRV8711-Treiber, DMS/Wägezelle). Single oder Dual Extruder.
 - Display und Menü wie die RF-Firmware: Startbild, Infoseiten 1–4 und Mod-Seite, Repetier-Menü auf Deutsch
 - Heizbett-Scan mit dem DMS wie Repetier (`M3010`, PLA/ABS-Scan), Z-Matrix im I2C-EEPROM im **Repetier-Format**
   (9 Plätze, Repetier und Marlin lesen die Matrizen gegenseitig), Z-Offset-Scan `M3900`
-- DRV8711-Motorstrom und Mikroschritte (`M906`, `M350`, `M122`)
+- DRV8711-Motorstrom und Mikroschritte (`M906`, `M350`, `M122`, Register lesen/testen `M3922`), Mikroschritte X/Y/Z 1/16, E 1/32,
+  im Menü Konfiguration → Mikroschritte änderbar
+- Bauraum und Home wie Repetier (0 = Schalter); X/Y fest höchstens 150 mm/s und 1200 mm/s²
 - Notfall-Pause, Sense Offset, Digit-Flow-Kompensation (`M3075`, `M3909`, `M3911`)
 - Z-Tasten, E-Tasten, Pause/Fortsetzen, Gehäuselüfter, 230V- und 24V-Ausgänge
 - RGB-Licht wie Repetier (Aus/Weiß/Auto/Manuell, `M3303`–`M3308`)
@@ -57,11 +59,17 @@ avrdude -patmega2560 -cwiring -P/dev/ttyUSB0 -b115200 -D -Uflash:w:firmware.hex:
 Unter Windows geht das auch mit XLoader oder Cura („Firmware aktualisieren“ → Benutzerdefiniert), Port COMx, 115200.
 
 Nach dem ersten Start: `M500` (neues EEPROM-Layout), dann Heizbett-Scan `M3010` mit Aufsicht und `M3001`.
-Verbindung zum Host: 115200 Baud, Firmware-Typ Marlin.
+Verbindung zum Host: **250000 Baud** (bis v1.0.3: 115200), Firmware-Typ Marlin. Flashen bleibt bei 115200.
+Wer von v1.0.2 oder älter kommt: X/Y waren auf 1/32, im Menü Konfiguration → Mikroschritte → XY 1/16 wählen und speichern.
 
 ## Slicer
 
-Start-G-Code zum Beispiel:
+- G-Code-Variante **Marlin 2**. Koordinaten wie Repetier: X 0 / Y 0 / Z 0 sind die Schalter. Am Y-Schalter steht die
+  Düse vor dem Bett (Überstand). Druckbett: Größe = Bettbreite × (Y max − Überstand), Nullpunkt X 0 / Y −Überstand.
+- Druckgeschwindigkeit am besten höchstens **130 mm/s** und **Arc fitting** an: Über USB schafft der ATmega2560 nur
+  etwa 110 kurze Segmente pro Sekunde, darüber ruckeln Rundungen.
+- Den passenden Start-G-Code (mit Vorextrudieren und Prime Line) und alle Orca-Werte gibt der Config Creator aus.
+  Kurz:
 
 ```
 G28
