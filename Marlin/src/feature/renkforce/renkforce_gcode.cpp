@@ -39,6 +39,9 @@
  *  M3909 [P] [S] [D]         sense offset: P threshold digits, S max offset um. P0 = off.
  *                            Switches on for the running print unless D1 (only store the values).
  *  M3911 [S] [F] [L] [H]     digit flow compensation: S flow %, F speed %, L/H digits range
+ *  M3922 [R V] [X Y Z E]     DRV8711 registers (test): without R read back registers 0..7 of all drivers,
+ *                            R<0..6> V<value, decimal> writes one register (default X and Y, not stored,
+ *                            a reset or M350/M906 writes the firmware values again)
  */
 
 #include "../../inc/MarlinConfig.h"
@@ -100,6 +103,28 @@ bool rf_process_mcode(const uint16_t code) {
       SERIAL_ECHOLNPGM("Mikroschritte X", rf.settings.drv_microsteps[RF_DRV_X], " Y", rf.settings.drv_microsteps[RF_DRV_Y],
                        " Z", rf.settings.drv_microsteps[RF_DRV_Z], " E0 ", rf.settings.drv_microsteps[RF_DRV_E0],
                        " E1 ", rf.settings.drv_microsteps[RF_DRV_E1]);
+    } break;
+
+    case 3922: {
+      if (parser.seenval('R')) {
+        const uint8_t r = parser.value_byte();
+        if (r > 6 || !parser.seenval('V')) { SERIAL_ECHOLNPGM("M3922: R0..6 und V noetig"); break; }
+        const uint16_t v = parser.value_ushort() & 0x0FFF;
+        bool sel[RF_DRV_COUNT] = { parser.seen_test('X'), parser.seen_test('Y'), parser.seen_test('Z'), parser.seen_test('E'), parser.seen_test('E') };
+        if (!(sel[0] || sel[1] || sel[2] || sel[3])) sel[0] = sel[1] = true;
+        for (uint8_t d = 0; d < RF_DRV_COUNT; ++d) if (sel[d]) rf_drv.write_reg(d, r, v);
+      }
+      for (uint8_t d = 0; d < RF_DRV_COUNT; ++d) {
+        if (d == RF_DRV_E1 && DISABLED(HAS_MULTI_EXTRUDER)) continue;
+        SERIAL_ECHOPGM("DRV8711 ");
+        SERIAL_CHAR("XYZEE"[d]);
+        if (d >= RF_DRV_E0) SERIAL_CHAR('0' + d - RF_DRV_E0);
+        for (uint8_t r = 0; r < 8; ++r) {
+          SERIAL_ECHOPGM(" R", r, "=0x");
+          SERIAL_PRINT(rf_drv.read_reg(d, r), PrintBase::Hex);
+        }
+        SERIAL_EOL();
+      }
     } break;
 
     case 906: {

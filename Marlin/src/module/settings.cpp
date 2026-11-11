@@ -628,6 +628,19 @@ uint16_t MarlinSettings::datasize() { return sizeof(SettingsData); }
 void MarlinSettings::postprocess() {
   xyze_pos_t oldpos = current_position;
 
+  #if ENABLED(RENKFORCE_RF)
+    // RF: hard limits also for values stored by older versions (e.g. 200 mm/s, 1500 mm/s^2)
+    {
+      constexpr float fr_max[] = MAX_FEEDRATE_EDIT_VALUES, acc_max[] = MAX_ACCEL_EDIT_VALUES;
+      LOOP_DISTINCT_AXES(i) {
+        NOMORE(planner.settings.max_feedrate_mm_s[i], fr_max[_MIN(i, COUNT(fr_max) - 1)]);
+        NOMORE(planner.settings.max_acceleration_mm_per_s2[i], acc_max[_MIN(i, COUNT(acc_max) - 1)]);
+      }
+      NOMORE(planner.settings.acceleration, acc_max[X_AXIS]);
+      NOMORE(planner.settings.travel_acceleration, acc_max[X_AXIS]);
+    }
+  #endif
+
   // steps per s2 needs to be updated to agree with units per s2
   planner.refresh_acceleration_rates();
 

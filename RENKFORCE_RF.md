@@ -38,6 +38,15 @@ Düsen X 0 … X max erreichen; T1 darf bis X max + Versatz. Homing 80/80/9 mm/s
 Die Koordinaten der Z-Matrix im 24C256 sind damit dieselben wie in Marlin. M3079 (Objekt ausgeben) fährt wie
 Repetier auf Z max und Y 245.
 
+## Geschwindigkeit und Beschleunigung
+
+X/Y höchstens **150 mm/s** und **1200 mm/s²** (`DEFAULT_MAX_FEEDRATE`, `DEFAULT_MAX_ACCELERATION`, Druck- und
+Fahrbeschleunigung 1200). Die Grenzen sind fest: `M203`/`M201` (auch vom Slicer) und das Menü können sie nicht
+überschreiten (`LIMITED_MAX_FR_EDITING`, `LIMITED_MAX_ACCEL_EDITING`), ältere Werte aus dem EEPROM werden beim
+Laden darauf begrenzt. Im Slicer am besten bis **130 mm/s**: Über USB schafft der ATmega2560 nur etwa 110 kurze
+Segmente (1 mm) pro Sekunde, darüber läuft der Puffer leer und Rundungen ruckeln. Abhilfe: in Orca „Arc fitting“
+(G2/G3) einschalten oder die Auflösung gröber stellen (z. B. 0,05 mm).
+
 ## Bauen und flashen
 
 ```sh
@@ -100,7 +109,7 @@ Serielle Verbindung 115200 Baud. `python3 rf_tools/build_all.py` baut alle 6 Var
 
 | Repetier | Marlin |
 |---|---|
-| DRV8711-Treiber (Software-SPI, CS high aktiv) | `drv8711.cpp`, `M906` (mA), `M350`, `M122`; Mikroschritte Standard X/Y/Z 16, E 32, im Menü Konfiguration → Mikroschritte änderbar (Schritte/mm werden mitgerechnet, speichern mit „Einst. speichern“) |
+| DRV8711-Treiber (Software-SPI, CS high aktiv) | `drv8711.cpp`, `M906` (mA), `M350`, `M122`, `M3922` (Register lesen, Test: `M3922 R3 V384` schreibt ein Register, dezimal, nicht gespeichert); Mikroschritte Standard X/Y/Z 16, E 32, im Menü Konfiguration → Mikroschritte änderbar (Schritte/mm werden mitgerechnet, speichern mit „Einst. speichern“) |
 | DMS (ADS1100, 0x49) | `loadcell.cpp`, Werte in Repetier-Digits, `M3002` |
 | Heizbett-Scan, Z-Kompensation, Z-Matrix | `hbscan.cpp`, `zmatrix.cpp` (siehe oben) |
 | `FEATURE_EMERGENCY_PAUSE` | `M3075 L H` → Pause an der Pause-Position (`M3105 X Y Z`) |
