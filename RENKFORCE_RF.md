@@ -28,8 +28,8 @@ Daraus folgen Board (`BOARD_RENKFORCE_RF1000` / `BOARD_RENKFORCE_RF2000`), Raste
 Wie in der RF-Repetier-Firmware (`RF1000.h`, `RF2000.h`, `RF2000v2.h`): X=0, Y=0 und Z=0 sind die Schalter,
 gehomt wird X, Y, Z nach min. G-Codes fahren nie unter Z=0; die Z-Tasten dürfen bis zum Überfahrweg darunter.
 
-- RF1000: X 245 (Dual 200), Y 245, Z 200, Überfahrweg Z 0,8 mm, Düse 2 X 33,9 / Y 0,1
-- RF2000: X 230 (Dual 200), Y 245, Z 200, Überfahrweg Z 1,3 mm, Düse 2 X 33,9 / Y 0,1
+- RF1000: X 240 (Dual 200, beide am Drucker gemessen; Repetier 245), Y 245, Z 200, Überfahrweg Z 0,8 mm, Düse 2 X 33,9 / Y 0,1
+- RF2000: X 240 (Dual 200, beide am Drucker gemessen; Repetier 230), Y 245, Z 200, Überfahrweg Z 1,3 mm, Düse 2 X 33,9 / Y 0,1
 - RF2000 v2: X 230 (Dual 170), Y 290, Z 185, Überfahrweg Z 3,0 mm, Düse 2 X 33,6 / Y 0
 
 Dual: Der X-Schalter liegt bei X = −Versatz Düse 2 (Repetier fährt T0 nach dem Homing dorthin), damit beide

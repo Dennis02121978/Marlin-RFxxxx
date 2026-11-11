@@ -108,8 +108,8 @@
  * after homing), so both nozzles reach X 0..RF_X_MAX.
  *
  *              X single  X dual  Y    Z    Z below switch  T1 offset X / Y
- *   RF1000       245      200   245  200       0.8            33.9 / 0.1
- *   RF2000       230      200   245  200       1.3            33.9 / 0.1
+ *   RF1000       240      200   245  200       0.8            33.9 / 0.1
+ *   RF2000       240      200   245  200       1.3            33.9 / 0.1
  *   RF2000 v2    230      170   290  185       3.0            33.6 / 0.0
  */
 #define RF_MODEL_RF1000   1
@@ -120,7 +120,7 @@
 #define RF_MODEL RF_MODEL_RF2000
 //#define RF_DUAL_EXTRUDER
 #define RF_FILAMENT_DIA        2.85   // mm
-//#define RF_X_MAX              230   // mm, X travel (RF Repetier X_MAX_LENGTH_PRINT)
+//#define RF_X_MAX              240   // mm, X travel (RF Repetier X_MAX_LENGTH_PRINT, single RF1000/RF2000 measured 240)
 //#define RF_Y_MAX              245   // mm, Y travel (RF Repetier Y_MAX_LENGTH)
 //#define RF_Z_MAX              200   // mm, Z travel (RF Repetier Z_MAX_LENGTH)
 #define RF_E_STEPS              280   // extruder steps/mm (32 microsteps)
@@ -144,7 +144,7 @@
   #define RF_IS_RF1000
   #define RF_MACHINE_NAME "RF1000"
   #ifndef RF_X_MAX
-    #define RF_X_MAX   TERN(RF_DUAL_EXTRUDER, 200, 245)
+    #define RF_X_MAX   TERN(RF_DUAL_EXTRUDER, 200, 240)   // measured on the printer (Repetier: 245)
   #endif
   #ifndef RF_Y_MAX
     #define RF_Y_MAX   245
@@ -161,7 +161,7 @@
   #define RF_IS_RF2000
   #define RF_MACHINE_NAME "RF2000"
   #ifndef RF_X_MAX
-    #define RF_X_MAX   TERN(RF_DUAL_EXTRUDER, 200, 230)
+    #define RF_X_MAX   TERN(RF_DUAL_EXTRUDER, 200, 240)   // measured on the printer (Repetier: 230)
   #endif
   #ifndef RF_Y_MAX
     #define RF_Y_MAX   245

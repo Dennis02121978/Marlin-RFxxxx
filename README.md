@@ -66,8 +66,8 @@ Wer von v1.0.2 oder älter kommt: X/Y waren auf 1/32, im Menü Konfiguration →
 
 - G-Code-Variante **Marlin 2**. Koordinaten wie Repetier: X 0 / Y 0 / Z 0 sind die Schalter. Am Y-Schalter steht die
   Düse vor dem Bett (Überstand). Druckbett: Größe = Bettbreite × (Y max − Überstand), Nullpunkt X 0 / Y −Überstand.
-  RF1000 und RF2000, Single und Dual (Überstand 22 mm): Größe 200 × 223, Nullpunkt 0 / −22, ausgenommene Druckbettfläche für die Prime Line
-  `0x22,200x22,200x27,0x27` (5 mm hinter der Bettkante).
+  RF1000 und RF2000 (Überstand 22 mm): Single Größe 240 × 223, Sperrbereich für die Prime Line `0x22,240x22,240x27,0x27`;
+  Dual Größe 200 × 223, Sperrbereich `0x22,200x22,200x27,0x27`. Nullpunkt jeweils 0 / −22.
 - Druckgeschwindigkeit am besten höchstens **130 mm/s** und **Arc fitting** an: Über USB schafft der ATmega2560 nur
   etwa 110 kurze Segmente pro Sekunde, darüber ruckeln Rundungen.
 - Den passenden Start-G-Code (mit Vorextrudieren und Prime Line) und alle Orca-Werte gibt der Config Creator aus.
