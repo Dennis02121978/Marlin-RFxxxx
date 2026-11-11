@@ -586,7 +586,7 @@ bool Renkforce::jog(const AxisEnum axis, const float dist, const feedRate_t fr_m
   if (axis == Z_AXIS) {
     if (!axis_is_trusted(Z_AXIS)) { LCD_MESSAGE_F("Zuerst Z referenzieren"); return false; }
     float target = current_position.z + dist;
-    LIMIT(target, float(Z_MIN_POS), float(Z_MAX_POS) - 0.5f);
+    LIMIT(target, -float(RF_SCAN_Z_DRIVE_OVER), float(Z_MAX_POS) - 0.5f);   // RF Repetier: keys may go below Z=0
     if (ABS(target - current_position.z) < 0.0005f) return false;
     current_position.z = target;
   }

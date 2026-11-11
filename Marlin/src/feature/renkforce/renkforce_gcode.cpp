@@ -187,10 +187,10 @@ bool rf_process_mcode(const uint16_t code) {
       SERIAL_ECHOLNPGM("Notfall-Pause: ", rf.settings.pause_min, " .. ", rf.settings.pause_max, " digits (0/0 = aus)");
       break;
 
-    case 3079:   // output the object: bed down, then to the front (Klipper PRINT_END: Y max - 5, Z 185)
+    case 3079:   // output the object like RF Repetier OUTPUT_OBJECT_SCRIPT_PRINT: bed down, then Y 245
       if (all_axes_trusted()) {
         do_blocking_move_to_z(_MAX(current_position.z, float(RF_OUTPUT_OBJECT_Z)), homing_feedrate(Z_AXIS));
-        do_blocking_move_to_xy(current_position.x, Y_MAX_POS - 5, homing_feedrate(Y_AXIS));
+        do_blocking_move_to_xy(current_position.x, float(RF_OUTPUT_OBJECT_Y), homing_feedrate(Y_AXIS));
       }
       break;
 

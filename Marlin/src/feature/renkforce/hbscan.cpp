@@ -32,8 +32,8 @@
  *   Errors (Z out of range, bed too uneven, no constant pressure) retry the point up to 5 times:
  *   lift, home Y, home Z, return to the point, read the idle pressure again.
  *
- * Grid: X from RF_SCAN_X_START to the axis end - RF_SCAN_X_END, Y (RF Repetier coordinates, from the
- * Y switch) from 30 to the axis end - 5, both every 20 mm. The Marlin grid is exactly this grid.
+ * Grid: X from RF_SCAN_X_START to the axis end - RF_SCAN_X_END, Y from 30 to the axis end - 5, both
+ * every 20 mm (Marlin coordinates = RF Repetier coordinates, 0 at the switches). The Marlin grid is exactly this grid.
  * The result is stored like RF Repetier (border columns at 0 and axis length) in the active matrix
  * of the 24C256 and used as Marlin bilinear mesh.
  *
@@ -334,7 +334,7 @@ namespace {
 } // namespace
 
 xy_pos_t Renkforce::scan_grid_start() {
-  return { float(RF_SCAN_X_START), float(RF_SCAN_Y_START - RF_Y_HOME) };   // Marlin Y = RF Repetier Y - RF_Y_HOME
+  return { float(RF_SCAN_X_START), float(RF_SCAN_Y_START) };   // Marlin X/Y = RF Repetier X/Y
 }
 xy_pos_t Renkforce::scan_grid_spacing() { return { float(RF_SCAN_STEP), float(RF_SCAN_STEP) }; }
 
@@ -400,7 +400,7 @@ void Renkforce::heatbed_scan(const uint8_t mode) {
 
   // states 130..148: precise scan, correction with the hotend at print temperature
   if (ok && (mode == 1 || mode == 2)) {
-    xy_to(HBS_CAL_X_MM, HBS_CAL_Y_MM - RF_Y_HOME);
+    xy_to(HBS_CAL_X_MM, HBS_CAL_Y_MM);
     zmove(mm_steps(10));
     ok = heat_wait(0, mode == 1 ? 210 : 240, HBS_CALIBRATION_S);
     if (ok) {

@@ -108,8 +108,8 @@ static uint8_t build_axis(const float start, const float spacing, const uint8_t 
   return k;
 }
 
-static constexpr int16_t y_offset = RF_Y_HOME;                       // RF Repetier Y = Marlin Y + this
-static constexpr int16_t x_length = X_MAX_POS, y_length = Y_MAX_POS + RF_Y_HOME;
+static constexpr int16_t y_offset = 0;                               // RF Repetier Y = Marlin Y + this
+static constexpr int16_t x_length = X_MAX_POS, y_length = Y_MAX_POS;  // X/Y_MAX_LENGTH
 
 static float z_steps_per_mm() { return planner.settings.axis_steps_per_mm[Z_AXIS]; }
 

@@ -102,8 +102,15 @@
  * The block "RF CONFIG CREATOR" is written by the Renkforce Config Creator (Marlin). Values left
  * out (commented) take the default of the model below.
  *
- * Values for the mechanics are the ones measured for the Klipper Config Creator
- * (Y=0 is the front edge of the bed, the nozzle stands RF_Y_HOME mm in front of it at the switch).
+ * Mechanics like the RF Repetier firmware (RF1000.h / RF2000.h / RF2000v2.h): X=0, Y=0, Z=0 are the
+ * switches, X/Y/Z max are X_MAX_LENGTH_PRINT / Y_MAX_LENGTH / Z_MAX_LENGTH. With two extruders the
+ * carriage stands RF_T1_OFFSET_X mm left of X=0 at the X switch (like Repetier, which moves T0 there
+ * after homing), so both nozzles reach X 0..RF_X_MAX.
+ *
+ *              X single  X dual  Y    Z    Z below switch  T1 offset X / Y
+ *   RF1000       245      180   245  200       0.8            33.9 / 0.1
+ *   RF2000       230      180   245  200       1.3            33.9 / 0.1
+ *   RF2000 v2    230      170   290  185       3.0            33.6 / 0.0
  */
 #define RF_MODEL_RF1000   1
 #define RF_MODEL_RF2000   2
@@ -113,11 +120,9 @@
 #define RF_MODEL RF_MODEL_RF2000
 //#define RF_DUAL_EXTRUDER
 #define RF_FILAMENT_DIA        2.85   // mm
-//#define RF_X_MAX              200   // mm, X travel
-//#define RF_Y_HOME              18   // mm, nozzle in front of the bed at the Y switch
-//#define RF_Y_TRAVEL           245   // mm, Y travel from the switch
-//#define RF_Z_MIN             -1.2   // mm, Z below the switch (overtravel)
-#define RF_Z_MAX                190   // mm
+//#define RF_X_MAX              230   // mm, X travel (RF Repetier X_MAX_LENGTH_PRINT)
+//#define RF_Y_MAX              245   // mm, Y travel (RF Repetier Y_MAX_LENGTH)
+//#define RF_Z_MAX              200   // mm, Z travel (RF Repetier Z_MAX_LENGTH)
 #define RF_E_STEPS              280   // extruder steps/mm (32 microsteps)
 //#define RF_T1_OFFSET_X        33.9   // mm, nozzle 2 (dual)
 //#define RF_T1_OFFSET_Y         0.1   // mm
@@ -139,67 +144,81 @@
   #define RF_IS_RF1000
   #define RF_MACHINE_NAME "RF1000"
   #ifndef RF_X_MAX
-    #define RF_X_MAX   TERN(RF_DUAL_EXTRUDER, 200, 240)
+    #define RF_X_MAX   TERN(RF_DUAL_EXTRUDER, 180, 245)
   #endif
-  #ifndef RF_Y_HOME
-    #define RF_Y_HOME  22     // nozzle in front of the bed at the Y switch
+  #ifndef RF_Y_MAX
+    #define RF_Y_MAX   245
   #endif
-  #ifndef RF_Y_TRAVEL
-    #define RF_Y_TRAVEL 245   // Y travel from the switch
+  #ifndef RF_Z_MAX
+    #define RF_Z_MAX   200
   #endif
-  #ifndef RF_Z_MIN
-    #define RF_Z_MIN  -0.8    // mechanical Z switch, overtravel below Z=0
-  #endif
-  #define RF_SCAN_Z_DRIVE_OVER 0.8   // RF Repetier Z_ENDSTOP_DRIVE_OVER (heat bed scan limit below Z=0)
-  #define RF_MESH_Y_MAX 220
+  #define RF_T1_DEFAULT_X 33.9
+  #define RF_T1_DEFAULT_Y 0.1
+  #define RF_SCAN_Z_DRIVE_OVER 0.8   // RF Repetier Z_ENDSTOP_DRIVE_OVER (Z below the switch)
+  #define RF_Z_HYSTERESIS      0.5   // RF Repetier Z_ENDSTOP_MAX_HYSTERESIS
 #elif RF_MODEL == RF_MODEL_RF2000
   #define MOTHERBOARD BOARD_RENKFORCE_RF2000
   #define RF_IS_RF2000
   #define RF_MACHINE_NAME "RF2000"
   #ifndef RF_X_MAX
-    #define RF_X_MAX   200
+    #define RF_X_MAX   TERN(RF_DUAL_EXTRUDER, 180, 230)
   #endif
-  #ifndef RF_Y_HOME
-    #define RF_Y_HOME  18
+  #ifndef RF_Y_MAX
+    #define RF_Y_MAX   245
   #endif
-  #ifndef RF_Y_TRAVEL
-    #define RF_Y_TRAVEL 245
+  #ifndef RF_Z_MAX
+    #define RF_Z_MAX   200
   #endif
-  #ifndef RF_Z_MIN
-    #define RF_Z_MIN  -1.2    // light barrier
-  #endif
+  #define RF_T1_DEFAULT_X 33.9
+  #define RF_T1_DEFAULT_Y 0.1
   #define RF_SCAN_Z_DRIVE_OVER 1.3
-  #define RF_MESH_Y_MAX 220
+  #define RF_Z_HYSTERESIS      0.1
 #else
   #define MOTHERBOARD BOARD_RENKFORCE_RF2000
   #define RF_MACHINE_NAME "RF2000 v2"
   #ifndef RF_X_MAX
-    #define RF_X_MAX   200
+    #define RF_X_MAX   TERN(RF_DUAL_EXTRUDER, 170, 230)
   #endif
-  #ifndef RF_Y_HOME
-    #define RF_Y_HOME  5
+  #ifndef RF_Y_MAX
+    #define RF_Y_MAX   290
   #endif
-  #ifndef RF_Y_TRAVEL
-    #define RF_Y_TRAVEL 295
+  #ifndef RF_Z_MAX
+    #define RF_Z_MAX   185
   #endif
-  #ifndef RF_Z_MIN
-    #define RF_Z_MIN  -1.2
-  #endif
+  #define RF_T1_DEFAULT_X 33.6
+  #define RF_T1_DEFAULT_Y 0.0
   #define RF_SCAN_Z_DRIVE_OVER 3.0
-  #define RF_MESH_Y_MAX 275
+  #define RF_Z_HYSTERESIS      0.2
 #endif
 
-// Heat bed scan like RF Repetier (HEAT_BED_SCAN_*): X from the X switch, Y from the Y switch (RF Repetier
-// coordinates), every 20 mm. The Marlin mesh is exactly this grid.
+#if defined(RF_Y_HOME) || defined(RF_Y_TRAVEL) || defined(RF_Z_MIN)
+  #error "RF_Y_HOME / RF_Y_TRAVEL / RF_Z_MIN are gone: Y=0 is the Y switch like RF Repetier, use RF_Y_MAX (new Config Creator)."
+#endif
+
+#if ENABLED(RF_DUAL_EXTRUDER)
+  #ifndef RF_T1_OFFSET_X
+    #define RF_T1_OFFSET_X RF_T1_DEFAULT_X
+  #endif
+  #ifndef RF_T1_OFFSET_Y
+    #define RF_T1_OFFSET_Y RF_T1_DEFAULT_Y
+  #endif
+  // RF Repetier homeXAxis()/homeYAxis(): the switch is this far before 0 so both nozzles reach 0
+  #define RF_HOME_X (-(RF_T1_OFFSET_X > 0 ? RF_T1_OFFSET_X : 0))
+  #define RF_HOME_Y (-(RF_T1_OFFSET_Y > 0 ? RF_T1_OFFSET_Y : 0))
+#else
+  #define RF_HOME_X 0
+  #define RF_HOME_Y 0
+#endif
+
+// Heat bed scan like RF Repetier (HEAT_BED_SCAN_*): X/Y from the switch (= Marlin X/Y), every 20 mm
+// up to the axis length minus the end margin. The Marlin mesh is exactly this grid.
 #define RF_SCAN_X_START  TERN(RF_DUAL_EXTRUDER, 0, 15)
 #define RF_SCAN_X_END    TERN(RF_DUAL_EXTRUDER, 0, 5)
 #define RF_SCAN_Y_START  30
 #define RF_SCAN_Y_END    5
 #define RF_SCAN_STEP     20
 #define RF_GRID_X ((RF_X_MAX - RF_SCAN_X_START - RF_SCAN_X_END) / RF_SCAN_STEP + 1)
-#define RF_GRID_Y ((RF_Y_TRAVEL - RF_SCAN_Y_START - RF_SCAN_Y_END) / RF_SCAN_STEP + 1)
-#define RF_MESH_X_MIN 10
-#define RF_MESH_Y_MIN 50
+#define RF_GRID_Y ((RF_Y_MAX - RF_SCAN_Y_START - RF_SCAN_Y_END) / RF_SCAN_STEP + 1)
 
 // Choose the name from boards.h that matches your setup
 #ifndef MOTHERBOARD
@@ -493,12 +512,6 @@
 // The offset has to be X=0, Y=0 for the extruder 0 hotend (default extruder).
 // For the other hotends it is their distance from the extruder 0 hotend.
 #if ENABLED(RF_DUAL_EXTRUDER)
-  #ifndef RF_T1_OFFSET_X
-    #define RF_T1_OFFSET_X TERN(RF_IS_RF2000, 33.9, 33.6)
-  #endif
-  #ifndef RF_T1_OFFSET_Y
-    #define RF_T1_OFFSET_Y TERN(RF_IS_RF2000, 0.1, 0.0)
-  #endif
   #define HOTEND_OFFSET_X { 0.0, RF_T1_OFFSET_X } // (mm) relative X-offset for each nozzle (M218 T1 X)
   #define HOTEND_OFFSET_Y { 0.0, RF_T1_OFFSET_Y } // (mm) relative Y-offset for each nozzle
   #define HOTEND_OFFSET_Z { 0.0, 0.00 }  // (mm) relative Z-offset for each nozzle
@@ -1850,15 +1863,16 @@
 
 // The size of the printable area
 #define X_BED_SIZE RF_X_MAX
-#define Y_BED_SIZE (RF_Y_TRAVEL - RF_Y_HOME)
+#define Y_BED_SIZE RF_Y_MAX
 
 // Travel limits (linear=mm, rotational=°) after homing, corresponding to endstop positions.
-#define X_MIN_POS 0
-#define Y_MIN_POS (-(RF_Y_HOME))   // Y=0 is the front edge of the bed
-#define Z_MIN_POS RF_Z_MIN
+// RF Repetier: 0 at the switches, G-codes never below Z=0 (Z keys may go RF_SCAN_Z_DRIVE_OVER below)
+#define X_MIN_POS RF_HOME_X
+#define Y_MIN_POS RF_HOME_Y
+#define Z_MIN_POS 0
 #define X_MAX_POS X_BED_SIZE
 #define Y_MAX_POS Y_BED_SIZE
-#define Z_MAX_POS RF_Z_MAX   // 10 mm reserve (Config Creator)
+#define Z_MAX_POS RF_Z_MAX
 //#define I_MIN_POS 0
 //#define I_MAX_POS 50
 //#define J_MIN_POS 0
@@ -2232,7 +2246,7 @@
 // For DELTA this is the top-center of the Cartesian print volume.
 //#define MANUAL_X_HOME_POS 0
 //#define MANUAL_Y_HOME_POS 0
-#define MANUAL_Z_HOME_POS 0   // RF: light barrier / switch is Z=0, Z_MIN_POS is the overtravel below
+#define MANUAL_Z_HOME_POS 0   // RF: light barrier / switch is Z=0 (Z keys may go RF_SCAN_Z_DRIVE_OVER below)
 //#define MANUAL_I_HOME_POS 0
 //#define MANUAL_J_HOME_POS 0
 //#define MANUAL_K_HOME_POS 0
@@ -2255,7 +2269,7 @@
 #endif
 
 // Homing speeds (linear=mm/min, rotational=°/min)
-#define HOMING_FEEDRATE_MM_M { (40*60), (35*60), (8*60) }
+#define HOMING_FEEDRATE_MM_M { (80*60), (80*60), (9*60) }   // RF Repetier HOMING_FEEDRATE_*_PRINT
 
 // Validate that endstops are triggered on homing moves
 #define VALIDATE_HOMING_ENDSTOPS

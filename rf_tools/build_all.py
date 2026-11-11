@@ -34,6 +34,10 @@ Flashen (Host wie Repetier-Server, OctoPrint oder Klipper vorher stoppen):
 Nach dem ersten Start: M500, dann Heizbett-Scan M3010 mit Aufsicht und M3001.
 Host-Verbindung: 115200 Baud, Firmware Marlin.
 
+Koordinaten wie Repetier: X=0, Y=0, Z=0 sind die Schalter. Im Slicer (Orca) G-Code Marlin 2,
+Druckbett-Nullpunkt Y = -Ueberstand der Duese vor dem Bett (z. B. -22), Tiefe = Y max - Ueberstand.
+Die genauen Werte je Modell zeigt der Config Creator (Auswahl Marlin, Seite Slicer).
+
 Eigene Werte: Renkforce Config Creator, Auswahl Marlin. Die beiden Configuration-Dateien
 nach Marlin/ im Quellcode kopieren und mit "pio run -e mega2560ext" bauen.
 

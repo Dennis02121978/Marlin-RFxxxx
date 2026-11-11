@@ -879,8 +879,9 @@
 
 //#define SENSORLESS_BACKOFF_MM  { 2, 2, 0 }  // (linear=mm, rotational=°) Backoff from endstops before sensorless homing
 
-#define HOMING_BUMP_MM      { 5, 5, 2 }       // (linear=mm, rotational=°) Backoff from endstops after first bump
-#define HOMING_BUMP_DIVISOR { 2, 2, 4 }       // Re-Bump Speed Divisor (Divides the Homing Feedrate)
+// RF Repetier ENDSTOP_X/Y/Z_BACK_MOVE and ENDSTOP_*_RETEST_REDUCTION_FACTOR
+#define HOMING_BUMP_MM      { 5, 5, (RF_Z_HYSTERESIS + RF_SCAN_Z_DRIVE_OVER) } // (linear=mm, rotational=°) Backoff from endstops after first bump
+#define HOMING_BUMP_DIVISOR { 20, 20, 20 }    // Re-Bump Speed Divisor (Divides the Homing Feedrate)
 
 //#define HOMING_BACKOFF_POST_MM { 2, 2, 2 }  // (linear=mm, rotational=°) Backoff from endstops after homing
 //#define XY_COUNTERPART_BACKOFF_MM 0         // (mm) Backoff X after homing Y, and vice-versa
@@ -2176,10 +2177,10 @@
  * the probe to be unable to reach any points.
  */
 #if PROBE_SELECTED && !IS_KINEMATIC
-  #define PROBING_MARGIN_LEFT  RF_MESH_X_MIN
-  #define PROBING_MARGIN_RIGHT 0
-  #define PROBING_MARGIN_FRONT RF_MESH_Y_MIN
-  #define PROBING_MARGIN_BACK  (Y_BED_SIZE - (RF_MESH_Y_MAX))
+  #define PROBING_MARGIN_LEFT  RF_SCAN_X_START   // RF Repetier HEAT_BED_SCAN_X/Y_START/END_MM
+  #define PROBING_MARGIN_RIGHT RF_SCAN_X_END
+  #define PROBING_MARGIN_FRONT RF_SCAN_Y_START
+  #define PROBING_MARGIN_BACK  RF_SCAN_Y_END
 #endif
 
 #if EITHER(MESH_BED_LEVELING, AUTO_BED_LEVELING_UBL)
@@ -4342,7 +4343,8 @@
   #define RF_KEY_E_HOLD_MS        1000
 
   #define RF_CASE_FAN_OFF_DELAY     60    // s, case fan runs on after motors / heaters are off
-  #define RF_OUTPUT_OBJECT_Z       185    // M3079: bed down to this Z
+  #define RF_OUTPUT_OBJECT_Z  Z_MAX_POS                 // M3079 like RF Repetier OUTPUT_OBJECT_SCRIPT_PRINT (G1 Z200, G1 Y245)
+  #define RF_OUTPUT_OBJECT_Y  _MIN(245, Y_MAX_POS)
   #define RF_PAUSE_POS_X             0    // pause position (M3105, menu "Pause Position")
   #define RF_PAUSE_POS_Y  (Y_MAX_POS - 5)
   #define RF_PAUSE_POS_Z            30    // minimum height while paused

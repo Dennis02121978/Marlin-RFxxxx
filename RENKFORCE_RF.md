@@ -12,7 +12,7 @@ Renkforce Config Creator (Auswahl „Marlin“). Auskommentierte Werte nehmen de
 | `RF_MODEL` | `RF_MODEL_RF1000`, `RF_MODEL_RF2000`, `RF_MODEL_RF2000V2` |
 | `RF_DUAL_EXTRUDER` | zwei Extruder |
 | `RF_FILAMENT_DIA` | 1.75 / 2.85 / 3.00 mm |
-| `RF_X_MAX`, `RF_Y_HOME`, `RF_Y_TRAVEL`, `RF_Z_MIN`, `RF_Z_MAX` | Bauraum (Y=0 = Vorderkante Bett, die Düse steht am Y-Schalter `RF_Y_HOME` mm davor) |
+| `RF_X_MAX`, `RF_Y_MAX`, `RF_Z_MAX` | Bauraum wie RF Repetier (`X_MAX_LENGTH_PRINT`, `Y_MAX_LENGTH`, `Z_MAX_LENGTH`), siehe „Bauraum und Home“ |
 | `RF_E_STEPS` | Extruder-Schritte/mm (32 Mikroschritte) |
 | `RF_T1_OFFSET_X/Y` | Versatz Düse 2 (Dual) |
 | `RF_PREHEAT_HOTEND/BED` | Vorheizen 1 |
@@ -22,6 +22,21 @@ Renkforce Config Creator (Auswahl „Marlin“). Auskommentierte Werte nehmen de
 
 Daraus folgen Board (`BOARD_RENKFORCE_RF1000` / `BOARD_RENKFORCE_RF2000`), Raster des Heizbett-Scans und Display
 (RF1000 16x4 a00, sonst 20x4 westlich). Motorstrom, DMS-Werte und Tasten stehen am Ende von `Configuration_adv.h`.
+
+## Bauraum und Home
+
+Wie in der RF-Repetier-Firmware (`RF1000.h`, `RF2000.h`, `RF2000v2.h`): X=0, Y=0 und Z=0 sind die Schalter,
+gehomt wird X, Y, Z nach min. G-Codes fahren nie unter Z=0; die Z-Tasten dürfen bis zum Überfahrweg darunter.
+
+- RF1000: X 245 (Dual 180), Y 245, Z 200, Überfahrweg Z 0,8 mm, Düse 2 X 33,9 / Y 0,1
+- RF2000: X 230 (Dual 180), Y 245, Z 200, Überfahrweg Z 1,3 mm, Düse 2 X 33,9 / Y 0,1
+- RF2000 v2: X 230 (Dual 170), Y 290, Z 185, Überfahrweg Z 3,0 mm, Düse 2 X 33,6 / Y 0
+
+Dual: Der X-Schalter liegt bei X = −Versatz Düse 2 (Repetier fährt T0 nach dem Homing dorthin), damit beide
+Düsen X 0 … X max erreichen; T1 darf bis X max + Versatz. Homing 80/80/9 mm/s, zweites Anfahren mit 1/20
+(Repetier `HOMING_FEEDRATE_*_PRINT`, `ENDSTOP_*_BACK_MOVE`, `ENDSTOP_*_RETEST_REDUCTION_FACTOR`).
+Die Koordinaten der Z-Matrix im 24C256 sind damit dieselben wie in Marlin. M3079 (Objekt ausgeben) fährt wie
+Repetier auf Z max und Y 245.
 
 ## Bauen und flashen
 
