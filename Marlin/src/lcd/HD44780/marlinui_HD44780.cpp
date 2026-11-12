@@ -458,7 +458,7 @@ void MarlinUI::clear_lcd() { lcd.clear(); }
      * Renkforce / 3D-Artmaker boot screen, same as the Klipper display (rf_display.cfg rf_splash):
      *   [cube]  3D-Artmaker   [cube]
      *   [cube]  -----------   [cube]
-     *       Version v1.5.7
+     *       Version v1.0.6
      *   [running bar] -> Stand -> Marlin version
      */
     static void rf_bootscreen() {
