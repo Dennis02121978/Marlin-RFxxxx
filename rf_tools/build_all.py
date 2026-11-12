@@ -74,6 +74,12 @@ def main():
                     z.writestr('LIESMICH.txt', readme(name, dual).replace('\n', '\r\n'))
     finally:
         open(CFG, 'w', encoding='utf-8').write(orig)
+    # Pruefsummen fuer das Release (der 3D-Artmaker Installer prueft damit die ZIPs)
+    import hashlib
+    zips = sorted(f for f in os.listdir(OUT) if f.startswith('Marlin_') and f.endswith('.zip'))
+    with open(os.path.join(OUT, 'SHA256SUMS'), 'w') as f:
+        for name in zips:
+            f.write('%s  %s\n' % (hashlib.sha256(open(os.path.join(OUT, name), 'rb').read()).hexdigest(), name))
     sys.exit(0 if ok else 1)
 
 
