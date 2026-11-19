@@ -4343,7 +4343,7 @@
   #define RF_KEY_E_HOLD_MS        1000
 
   #define RF_CASE_FAN_OFF_DELAY     60    // s, case fan runs on after motors / heaters are off
-  #define RF_OUTPUT_OBJECT_Z  Z_MAX_POS                 // M3079 like RF Repetier OUTPUT_OBJECT_SCRIPT_PRINT (G1 Z200, G1 Y245)
+  #define RF_OUTPUT_OBJECT_Z  (Z_MAX_POS - 10)          // M3079: bed down to 1 cm short of Z max (Z max itself is 1 cm too far), then Y 245
   #define RF_OUTPUT_OBJECT_Y  _MIN(245, Y_MAX_POS)
   #define RF_PAUSE_POS_X             0    // pause position (M3105, menu "Pause Position")
   #define RF_PAUSE_POS_Y  (Y_MAX_POS - 5)
@@ -4352,6 +4352,6 @@
   // Boot screen like the Klipper display (rf_display.cfg: rf_splash, _RF_INFO)
   #define RF_BOOTSCREEN
   #define RF_BOOT_TITLE   "3D-Artmaker"
-  #define RF_BOOT_VERSION "v1.0.6"   // Marlin-RFxxxx release
-  #define RF_BOOT_STAND   "12.11.2026"
+  #define RF_BOOT_VERSION "v1.0.7"   // Marlin-RFxxxx release
+  #define RF_BOOT_STAND   "19.11.2026"
 #endif
