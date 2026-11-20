@@ -97,8 +97,8 @@
  *
  *  RF_MODEL           RF_MODEL_RF1000, RF_MODEL_RF2000 or RF_MODEL_RF2000V2
  *  RF_DUAL_EXTRUDER   enable for two extruders
- *  RF_DUAL_CARRIAGE   dual carriage with only one hotend in the left place (T0): one extruder, but X like dual
- *                     (home X = -RF_T1_OFFSET_X, X max 200 / v2 170), so the nozzle reaches the bed like T0 of a dual
+ *  RF_DUAL_CARRIAGE   dual carriage with only one hotend in the left place (T0): one extruder, X like T0 of a dual
+ *                     (X 0..RF_X_MAX - RF_T1_OFFSET_X, e.g. 0..166.1)
  *  RF_FILAMENT_DIA    1.75, 2.85 or 3.00 mm
  *  RF_HOTEND          installed hotend at the first start, like RF Repetier EXT0_HOTEND_TYPE. Changeable at
  *                     runtime: menu Konfiguration -> Temperaturen PID -> Hotend, or M3930 S1..4 (stored):
@@ -111,9 +111,10 @@
  * out (commented) take the default of the model below.
  *
  * Mechanics like the RF Repetier firmware (RF1000.h / RF2000.h / RF2000v2.h): X=0, Y=0, Z=0 are the
- * switches, X/Y/Z max are X_MAX_LENGTH_PRINT / Y_MAX_LENGTH / Z_MAX_LENGTH. With two extruders the
- * carriage stands RF_T1_OFFSET_X mm left of X=0 at the X switch (like Repetier, which moves T0 there
- * after homing), so both nozzles reach X 0..RF_X_MAX.
+ * switches, X/Y/Z max are X_MAX_LENGTH_PRINT / Y_MAX_LENGTH / Z_MAX_LENGTH. Dual carriage (measured on the
+ * printer, 2026-11-20): at the X switch the left nozzle T0 stands at X 0 and the right nozzle T1 at X = offset.
+ * RF_X_MAX is the width both nozzles together reach: T0 prints X 0..RF_X_MAX - offset, T1 X offset..RF_X_MAX
+ * (e.g. offset 30: T0 0..170, T1 30..200). Marlin derives the T1 limits from the hotend offset (M218 T1 X).
  *
  *              X single  X dual  Y    Z    Z below switch  T1 offset X / Y
  *   RF1000       240      200   245  200       0.8            33.9 / 0.1
@@ -224,18 +225,21 @@
   #ifndef RF_T1_OFFSET_Y
     #define RF_T1_OFFSET_Y RF_T1_DEFAULT_Y
   #endif
-  // RF Repetier homeXAxis()/homeYAxis(): the switch is this far before 0 so both nozzles reach 0
-  #define RF_HOME_X (-(RF_T1_OFFSET_X > 0 ? RF_T1_OFFSET_X : 0))
-  #define RF_HOME_Y (-(RF_T1_OFFSET_Y > 0 ? RF_T1_OFFSET_Y : 0))
+  // T0 (left) is the reference: at the switches T0 is at X/Y 0, T1 at the offset. T0 reaches RF_X_MAX - offset,
+  // T1 offset..RF_X_MAX (Marlin adds the hotend offset to the soft endstops of T1).
+  #define RF_T0_X_MAX (RF_X_MAX - (RF_T1_OFFSET_X > 0 ? RF_T1_OFFSET_X : 0))
+  #define RF_T0_Y_MAX (RF_Y_MAX - (RF_T1_OFFSET_Y > 0 ? RF_T1_OFFSET_Y : 0))
 #else
-  #define RF_HOME_X 0
-  #define RF_HOME_Y 0
+  #define RF_T0_X_MAX RF_X_MAX
+  #define RF_T0_Y_MAX RF_Y_MAX
 #endif
+#define RF_HOME_X 0
+#define RF_HOME_Y 0
 
 // Heat bed scan like RF Repetier (HEAT_BED_SCAN_*): X/Y from the switch (= Marlin X/Y), every 20 mm
 // up to the axis length minus the end margin. The Marlin mesh is exactly this grid.
 #define RF_SCAN_X_START  TERN(RF_DUAL_GEO, 0, 15)
-#define RF_SCAN_X_END    TERN(RF_DUAL_GEO, 0, 5)
+#define RF_SCAN_X_END    TERN(RF_DUAL_GEO, 40, 5)   // dual: T0 only reaches RF_X_MAX - offset (offset up to 40 mm)
 #define RF_SCAN_Y_START  30
 #define RF_SCAN_Y_END    5
 #define RF_SCAN_STEP     20
@@ -1901,8 +1905,8 @@
 // @section geometry
 
 // The size of the printable area
-#define X_BED_SIZE RF_X_MAX
-#define Y_BED_SIZE RF_Y_MAX
+#define X_BED_SIZE RF_T0_X_MAX   // dual carriage: range of T0, T1 is shifted by its offset
+#define Y_BED_SIZE RF_T0_Y_MAX
 
 // Travel limits (linear=mm, rotational=°) after homing, corresponding to endstop positions.
 // RF Repetier: 0 at the switches, G-codes never below Z=0 (Z keys may go RF_SCAN_Z_DRIVE_OVER below)

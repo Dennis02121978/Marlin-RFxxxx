@@ -11,7 +11,8 @@ Renkforce Config Creator (Auswahl „Marlin“). Auskommentierte Werte nehmen de
 |---|---|
 | `RF_MODEL` | `RF_MODEL_RF1000`, `RF_MODEL_RF2000`, `RF_MODEL_RF2000V2` |
 | `RF_DUAL_EXTRUDER` | zwei Extruder |
-| `RF_DUAL_CARRIAGE` | Dual-Schlitten mit nur einem Hotend (links, T0): ein Extruder, aber X wie Dual (Home X = −`RF_T1_OFFSET_X`, X max 200, RF2000 v2 170) |
+| `RF_DUAL_CARRIAGE` | Dual-Schlitten mit nur einem Hotend (links, T0): ein Extruder, X wie T0 beim Dual (0 bis `RF_X_MAX` − Versatz, z. B. 166,1) |
+| Dual-Geometrie | Am X-Schalter steht die linke Düse (T0) auf X 0, die rechte (T1) auf X = Versatz. T0 druckt X 0 bis `RF_X_MAX` − Versatz, T1 Versatz bis `RF_X_MAX` (Versatz 30: T0 0–170, T1 30–200). Heizbett-Scan im Bereich von T0, alle 20 mm |
 | `RF_FILAMENT_DIA` | 1.75 / 2.85 / 3.00 mm |
 | `RF_HOTEND` | Hotend beim ersten Start: `RF_HOTEND_V1`, `RF_HOTEND_V2` (Original), `RF_HOTEND_V3` (NTC 3950), `RF_HOTEND_E3D` (Semitec 104-GT2). Ab v1.0.9 im Betrieb umschaltbar: Menü **Konfiguration → Temperaturen PID → Hotend** oder `M3930 S1..4 [T0/1]` (wie RF-Repetier-Menü „Sens.“). Setzt Thermistor (Sensor 1000, Steinhart-Hart-Fit an die Repetier-Tabellen 3/13/8, höchstens 1,1 °C Abweichung bei 150–280 °C, `M305`) und PID (Repetier HT2/HT3/HT4, `M301`). Heizbett Sensor 3 und PID 53,74/7,48/96,52 wie Repetier. Danach am besten `M303 E0 S220 C8 U1` + `M500` |
 | `RF_X_MAX`, `RF_Y_MAX`, `RF_Z_MAX` | Bauraum wie RF Repetier (`X_MAX_LENGTH_PRINT`, `Y_MAX_LENGTH`, `Z_MAX_LENGTH`), siehe „Bauraum und Home“ |

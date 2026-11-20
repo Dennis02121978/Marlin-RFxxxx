@@ -2192,9 +2192,10 @@
  */
 #if PROBE_SELECTED && !IS_KINEMATIC
   #define PROBING_MARGIN_LEFT  RF_SCAN_X_START   // RF Repetier HEAT_BED_SCAN_X/Y_START/END_MM
-  #define PROBING_MARGIN_RIGHT RF_SCAN_X_END
+  // RF: grid exactly every RF_SCAN_STEP mm from the start (like Repetier), the rest of the axis stays right/back
+  #define PROBING_MARGIN_RIGHT (X_BED_SIZE - (RF_SCAN_X_START) - (RF_GRID_X - 1) * (RF_SCAN_STEP))
   #define PROBING_MARGIN_FRONT RF_SCAN_Y_START
-  #define PROBING_MARGIN_BACK  RF_SCAN_Y_END
+  #define PROBING_MARGIN_BACK  (Y_BED_SIZE - (RF_SCAN_Y_START) - (RF_GRID_Y - 1) * (RF_SCAN_STEP))
 #endif
 
 #if EITHER(MESH_BED_LEVELING, AUTO_BED_LEVELING_UBL)

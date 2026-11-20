@@ -68,6 +68,8 @@ Wer von v1.0.2 oder älter kommt: X/Y waren auf 1/32, im Menü Konfiguration →
   Düse vor dem Bett (Überstand). Druckbett: Größe = Bettbreite × (Y max − Überstand), Nullpunkt X 0 / Y −Überstand.
   RF1000 und RF2000 (Überstand 22 mm): Single Größe 240 × 223, Sperrbereich für die Prime Line `0x22,240x22,240x27,0x27`;
   Dual Größe 200 × 223, Sperrbereich `0x22,200x22,200x27,0x27`. Nullpunkt jeweils 0 / −22.
+- Dual: Am X-Schalter steht die linke Düse auf X 0, die rechte auf X = Versatz. Linke Düse X 0 bis 200 − Versatz,
+  rechte Versatz bis 200 (RF2000 v2: 170). Dual-Schlitten mit nur dem linken Hotend (`RF_DUAL_CARRIAGE`): Bett 166 × 223.
 - Druckgeschwindigkeit am besten höchstens **130 mm/s** und **Arc fitting** an: Über USB schafft der ATmega2560 nur
   etwa 110 kurze Segmente pro Sekunde, darüber ruckeln Rundungen.
 - Den passenden Start-G-Code (mit Vorextrudieren und Prime Line) und alle Orca-Werte gibt der Config Creator aus.
