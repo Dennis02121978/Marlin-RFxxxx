@@ -98,6 +98,11 @@
  *  RF_MODEL           RF_MODEL_RF1000, RF_MODEL_RF2000 or RF_MODEL_RF2000V2
  *  RF_DUAL_EXTRUDER   enable for two extruders
  *  RF_FILAMENT_DIA    1.75, 2.85 or 3.00 mm
+ *  RF_HOTEND          installed hotend, like the RF Repetier menu "Sens." / EXT0_HOTEND_TYPE:
+ *                       RF_HOTEND_V1   Renkforce hotend V1 (Repetier sensor 3, PID HT2)
+ *                       RF_HOTEND_V2   Renkforce hotend V2, EPCOS G550 100k (Repetier sensor 3, PID HT3) = stock
+ *                       RF_HOTEND_V3   Conrad hotend V3, NTC 3950 100k (Repetier sensor 13, PID HT4)
+ *                       RF_HOTEND_E3D  E3D, Semitec 104-GT2 (Repetier sensor 8)
  *
  * The block "RF CONFIG CREATOR" is written by the Renkforce Config Creator (Marlin). Values left
  * out (commented) take the default of the model below.
@@ -116,10 +121,16 @@
 #define RF_MODEL_RF2000   2
 #define RF_MODEL_RF2000V2 3
 
+#define RF_HOTEND_V1  1
+#define RF_HOTEND_V2  2
+#define RF_HOTEND_V3  3
+#define RF_HOTEND_E3D 4
+
 // ==== BEGIN RF CONFIG CREATOR ====
 #define RF_MODEL RF_MODEL_RF2000
 //#define RF_DUAL_EXTRUDER
 #define RF_FILAMENT_DIA        2.85   // mm
+#define RF_HOTEND      RF_HOTEND_V2   // V1, V2 (stock), V3 or E3D (thermistor table and PID like RF Repetier)
 //#define RF_X_MAX              240   // mm, X travel (RF Repetier X_MAX_LENGTH_PRINT, single RF1000/RF2000 measured 240)
 //#define RF_Y_MAX              245   // mm, Y travel (RF Repetier Y_MAX_LENGTH)
 //#define RF_Z_MAX              200   // mm, Z travel (RF Repetier Z_MAX_LENGTH)
@@ -689,15 +700,28 @@
  *   998 : Dummy Table that ALWAYS reads 25°C or the temperature defined below.
  *   999 : Dummy Table that ALWAYS reads 100°C or the temperature defined below.
  */
-#define TEMP_SENSOR_0 1000   // EPCOS 100K B57550G0104, beta 4150 (Configuration_adv.h)
-#define TEMP_SENSOR_1 TERN(RF_DUAL_EXTRUDER, 1000, 0)
+// RF: sensor like RF Repetier (Extruder.cpp temptable_3 = Marlin table 3, identical values).
+//     Hotend V3: Repetier temptable_13 (NTC 3950) -> custom 1000 with beta 4200 (fit, within 1.5 C at 150..280 C).
+//     Before v1.0.8 the hotends used custom beta 4150, which read ~6 C too high at 230 C.
+#ifndef RF_HOTEND
+  #define RF_HOTEND RF_HOTEND_V2
+#endif
+#if RF_HOTEND == RF_HOTEND_V3
+  #define RF_HOTEND_SENSOR 1000
+#elif RF_HOTEND == RF_HOTEND_E3D
+  #define RF_HOTEND_SENSOR 5     // ATC Semitec 104GT-2 (Repetier sensor 8)
+#else
+  #define RF_HOTEND_SENSOR 3     // Renkforce hotend V1/V2, mendel-parts / EPCOS (Repetier sensor 3)
+#endif
+#define TEMP_SENSOR_0 RF_HOTEND_SENSOR
+#define TEMP_SENSOR_1 TERN(RF_DUAL_EXTRUDER, RF_HOTEND_SENSOR, 0)
 #define TEMP_SENSOR_2 0
 #define TEMP_SENSOR_3 0
 #define TEMP_SENSOR_4 0
 #define TEMP_SENSOR_5 0
 #define TEMP_SENSOR_6 0
 #define TEMP_SENSOR_7 0
-#define TEMP_SENSOR_BED 1000
+#define TEMP_SENSOR_BED 3   // RF Repetier HEATED_BED_SENSOR_TYPE 3
 #define TEMP_SENSOR_PROBE 0
 #define TEMP_SENSOR_CHAMBER 0
 #define TEMP_SENSOR_COOLER 0
@@ -824,9 +848,20 @@
     #define DEFAULT_KI_LIST {   1.08,   1.08 }
     #define DEFAULT_KD_LIST { 114.00, 114.00 }
   #else
-    #define DEFAULT_KP  38.71
-    #define DEFAULT_KI   2.412
-    #define DEFAULT_KD 155.323
+    // RF Repetier Configuration.h (same units: Ki per second, Kd in seconds). Better: M303 E0 S220 C8 U1, then M500
+    #if RF_HOTEND == RF_HOTEND_V1
+      #define DEFAULT_KP  37.52   // HT2_PID_*
+      #define DEFAULT_KI  10.00
+      #define DEFAULT_KD  35.18
+    #elif RF_HOTEND == RF_HOTEND_V3
+      #define DEFAULT_KP  17.11   // HT4_PID_*
+      #define DEFAULT_KI   2.05
+      #define DEFAULT_KD  35.75
+    #else
+      #define DEFAULT_KP  12.50   // HT3_PID_* (hotend V2, also E3D start value)
+      #define DEFAULT_KI   3.20
+      #define DEFAULT_KD  18.00
+    #endif
   #endif
 #else
   #define BANG_MAX 255    // Limit hotend current while in bang-bang mode; 255=full current
@@ -911,11 +946,10 @@
   //#define MIN_BED_POWER 0
   //#define PID_BED_DEBUG // Print Bed PID debug data to the serial port.
 
-  // 120V 250W silicone heater into 4mm borosilicate (MendelMax 1.5+)
-  // from FOPDT model - kp=.39 Tp=405 Tdead=66, Tc set to 79.2, aggressive factor of .15 (vs .1, 1, 10)
-  #define DEFAULT_BED_KP   58.098
-  #define DEFAULT_BED_KI    0.656
-  #define DEFAULT_BED_KD 1285.418
+  // RF Repetier RF1000.h/RF2000.h HEATED_BED_PID_* (better: M303 E-1 S60 C8 U1, then M500)
+  #define DEFAULT_BED_KP 53.74
+  #define DEFAULT_BED_KI  7.48
+  #define DEFAULT_BED_KD 96.52
 
   // FIND YOUR OWN: "M303 E-1 C8 S90" to run autotune on the bed at 90 degreesC for 8 cycles.
 #else
@@ -1411,7 +1445,7 @@
  *   https://blog.kyneticcnc.com/2018/10/computing-junction-deviation-for-marlin.html
  */
 #if DISABLED(CLASSIC_JERK)
-  #define JUNCTION_DEVIATION_MM 0.013 // (mm) Distance from real junction edge
+  #define JUNCTION_DEVIATION_MM 0.04  // (mm) RF: ~ RF Repetier MAX_JERK 13 at 1200 mm/s2 (0.4*j^2/a = 0.056); 0.013 slowed down at every curve segment
   #define JD_HANDLE_SMALL_SEGMENTS    // Use curvature estimation instead of just the junction angle
                                       // for small segments (< 1mm) with large junction angles (> 135°).
 #endif

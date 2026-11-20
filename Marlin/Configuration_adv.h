@@ -74,14 +74,14 @@
 #if TEMP_SENSOR_0 == 1000
   #define HOTEND0_PULLUP_RESISTOR_OHMS    4700 // Pullup resistor
   #define HOTEND0_RESISTANCE_25C_OHMS   100000 // Resistance at 25C
-  #define HOTEND0_BETA                    4150 // Beta value (EPCOS B57550G0104)
+  #define HOTEND0_BETA                    4200 // RF hotend V3 (NTC 3950): fit to RF Repetier temptable_13
   #define HOTEND0_SH_C_COEFF                 0 // Steinhart-Hart C coefficient
 #endif
 
 #if TEMP_SENSOR_1 == 1000
   #define HOTEND1_PULLUP_RESISTOR_OHMS    4700 // Pullup resistor
   #define HOTEND1_RESISTANCE_25C_OHMS   100000 // Resistance at 25C
-  #define HOTEND1_BETA                    4150 // Beta value
+  #define HOTEND1_BETA                    4200 // RF hotend V3 (see HOTEND0)
   #define HOTEND1_SH_C_COEFF                 0 // Steinhart-Hart C coefficient
 #endif
 
@@ -1139,13 +1139,13 @@
 #define DEFAULT_MINTRAVELFEEDRATE     0.0     // (mm/s) Minimum travel feedrate. Set with M205 T.
 
 // Minimum time that a segment needs to take as the buffer gets emptied
-#define DEFAULT_MINSEGMENTTIME        20000   // (µs) Set with M205 B.
+#define DEFAULT_MINSEGMENTTIME        15625   // (µs) Set with M205 B. RF Repetier LOW_TICKS_PER_MOVE 250000 / 16 MHz
 
 // Slow down the machine if the lookahead buffer is (by default) half full.
 // Increase the slowdown divisor for larger buffer sizes.
 #define SLOWDOWN
 #if ENABLED(SLOWDOWN)
-  #define SLOWDOWN_DIVISOR 2
+  #define SLOWDOWN_DIVISOR 2   // RF: below 8 of 16 blocks (RF Repetier MOVE_CACHE_LOW 10 of 17)
 #endif
 
 /**
@@ -2396,7 +2396,7 @@
 #if BOTH(SDSUPPORT, DIRECT_STEPPING)
   #define BLOCK_BUFFER_SIZE  8
 #elif ENABLED(SDSUPPORT)
-  #define BLOCK_BUFFER_SIZE 16
+  #define BLOCK_BUFFER_SIZE 16   // RF: like Repetier MOVE_CACHE_SIZE 17 (SD); 32 would need ~1 KB more RAM (85 %)
 #else
   #define BLOCK_BUFFER_SIZE 16
 #endif
@@ -2405,7 +2405,7 @@
 
 // The ASCII buffer for serial input
 #define MAX_CMD_SIZE 96
-#define BUFSIZE 4
+#define BUFSIZE 4   // RF: Repetier GCODE_BUFFER_SIZE 2; more costs 96 bytes RAM per line
 
 // Transmission to Host Buffer Size
 // To save 386 bytes of flash (and TX_BUFFER_SIZE+3 bytes of RAM) set to 0.
@@ -2420,7 +2420,7 @@
 // Without XON/XOFF flow control (see SERIAL_XON_XOFF below) 32 bytes should be enough.
 // To use flow control, set this buffer size to at least 1024 bytes.
 // :[0, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048]
-//#define RX_BUFFER_SIZE 1024
+#define RX_BUFFER_SIZE 256   // RF: host send cache (Repetier-Server: receive cache size up to 255)
 
 #if RX_BUFFER_SIZE >= 1024
   // Enable to have the controller send XON/XOFF control characters to

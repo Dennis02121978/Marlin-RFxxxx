@@ -12,6 +12,7 @@ Renkforce Config Creator (Auswahl „Marlin“). Auskommentierte Werte nehmen de
 | `RF_MODEL` | `RF_MODEL_RF1000`, `RF_MODEL_RF2000`, `RF_MODEL_RF2000V2` |
 | `RF_DUAL_EXTRUDER` | zwei Extruder |
 | `RF_FILAMENT_DIA` | 1.75 / 2.85 / 3.00 mm |
+| `RF_HOTEND` | verbautes Hotend wie RF-Repetier-Menü „Sens.“: `RF_HOTEND_V1`, `RF_HOTEND_V2` (Original, Sensor 3 = Marlin-Tabelle 3), `RF_HOTEND_V3` (NTC 3950, Repetier-Tabelle 13, Beta 4200), `RF_HOTEND_E3D` (Semitec 104-GT2 = Marlin 5). Setzt auch die PID-Vorgaben (Repetier HT2/HT3/HT4); Heizbett Sensor 3 und PID 53,74/7,48/96,52 wie Repetier. Nach dem Flashen `M502` + `M500`, besser `M303 E0 S220 C8 U1` + `M500` |
 | `RF_X_MAX`, `RF_Y_MAX`, `RF_Z_MAX` | Bauraum wie RF Repetier (`X_MAX_LENGTH_PRINT`, `Y_MAX_LENGTH`, `Z_MAX_LENGTH`), siehe „Bauraum und Home“ |
 | `RF_E_STEPS` | Extruder-Schritte/mm (32 Mikroschritte) |
 | `RF_T1_OFFSET_X/Y` | Versatz Düse 2 (Dual) |

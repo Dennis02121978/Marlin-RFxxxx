@@ -80,6 +80,69 @@ M3001          ; Z-Kompensation an (Matrix aus dem Heizbett-Scan)
 
 Ist eine Matrix gespeichert, schaltet die Firmware die Z-Kompensation schon beim Start ein (Display: „Kmp“). `M3001` im Start-G-Code schadet nicht, `M3000` schaltet sie ab.
 
+### Beispiel Orca: RF2000 Dual, 2,85 mm, Hotend V2, OctoPrint
+
+Start-G-Code:
+
+```
+M140 S[bed_temperature_initial_layer_single] ; Bett heizen
+M104 T[initial_tool] S{nozzle_temperature_initial_layer[initial_tool]}
+G28                ; Home
+M3001              ; Z-Kompensation (Heizbett-Matrix) an
+M190 S[bed_temperature_initial_layer_single]
+M109 T[initial_tool] S{nozzle_temperature_initial_layer[initial_tool]}
+T[initial_tool]
+; Vorextrudieren an der Home-Position (Duese steht vor dem Bett), dann Retract
+M82
+M900 K1.45    ; LinAdvance 2.85mm V2 Hotend
+G92 E0
+G1 Z5 F600
+G1 E5 F200        ; 0.5 cm extrudieren
+G1 E8 F2400        ; 2 mm Retract
+; Prime Line vorne auf dem Bett (Bettkante bei Y18), Menge fuer 3.00 mm Filament
+G1 X160 Y25 F5000
+G1 Z0.35 F600
+G1 E10 F2400       ; Retract zurueck
+G1 X20 E14.1 F1000
+G1 Y26 F1000
+G1 X160 E18.2 F1000
+G92 E0
+G1 Z2 F3000
+G92 E0
+```
+
+End-G-Code:
+
+```
+M104 S0
+M140 S0
+M107
+G91
+G1 E-2 F1800
+G90
+M3079            ; Objekt ausgeben (Bett nach unten)
+M84
+```
+
+Hinweise dazu:
+- `M900` (Linear Advance) wirkt nur, wenn `LIN_ADVANCE` in Configuration_adv.h eingeschaltet ist. In den
+  Release-Builds ist es aus, `M900` meldet dann nur „Unknown command“.
+- Mit `M82` (absolut) fördern `G1 E8` und `G1 E10` weiter vor (je 3 bzw. 2 mm), sie ziehen nicht zurück.
+  Ein echter Retract nach `G1 E5` wäre `G1 E3`, das Zurückschieben `G1 E5` (so schreibt es der Config Creator).
+- Dual: `M104 S0` schaltet nur die aktive Düse ab. Sicherer: `M104 S0 T0` und `M104 S0 T1`.
+
+### USB-Host (OctoPrint, Repetier-Server)
+
+OctoPrint schickt jede Zeile erst nach dem „ok“ der vorherigen. Der FTDI-Chip des RF-Boards hält Antworten
+standardmäßig bis zu 16 ms zurück (`latency_timer`), dann kommen nur etwa 60 Zeilen pro Sekunde an und der Drucker
+ruckelt schon bei 40 mm/s mit kurzen Segmenten. Abhilfe auf dem Pi (einmalig):
+
+```
+echo 'ACTION=="add", SUBSYSTEM=="usb-serial", DRIVER=="ftdi_sio", ATTR{latency_timer}="1"' | sudo tee /etc/udev/rules.d/99-ftdi-latency.rules
+sudo udevadm control --reload
+echo 1 | sudo tee /sys/bus/usb-serial/devices/ttyUSB0/latency_timer
+```
+
 Pause: `M25`, Filamentwechsel: `M600`.
 
 ## Lizenz
