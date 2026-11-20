@@ -450,6 +450,11 @@ void CardReader::mount() {
   nrItems = -1;
   if (root.isOpen()) root.close();
 
+  #if BOTH(RENKFORCE_RF, HAS_SD_DETECT)
+    // RF: hosts like OctoPrint send M21 on connect. Without a card only report it, no "Medium Init fehlgesch." alert.
+    if (!IS_SD_INSERTED()) { SERIAL_ECHO_MSG(STR_NO_MEDIA); ui.refresh(); return; }
+  #endif
+
   if (!driver->init(SD_SPI_SPEED, SDSS)
     #if defined(LCD_SDSS) && (LCD_SDSS != SDSS)
       && !driver->init(SD_SPI_SPEED, LCD_SDSS)
