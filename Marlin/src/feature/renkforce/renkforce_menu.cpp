@@ -312,10 +312,32 @@ static void menu_rf_dms() {
   END_MENU();
 }
 
+// Hotend type like RF Repetier "Sens." (thermistor + PID), stored at once
+static uint8_t hotend_e;
+static void hotend_pick(const uint8_t t) {
+  rf.set_hotend(hotend_e, t, true);
+  save_now();
+  ui.goto_previous_screen();
+}
+static void menu_rf_hotend_type() {
+  START_MENU();
+  BACK_ITEM_F(F("Temperaturen PID"));
+  STATIC_ITEM_F(rf.hotend_name(rf.settings.hotend[hotend_e]), SS_LEFT);
+  ACTION_ITEM_F(F("V1"),          []{ hotend_pick(RF_HOTEND_V1); });
+  ACTION_ITEM_F(F("V2 Original"), []{ hotend_pick(RF_HOTEND_V2); });
+  ACTION_ITEM_F(F("V3 NTC3950"),  []{ hotend_pick(RF_HOTEND_V3); });
+  ACTION_ITEM_F(F("E3D 104GT2"),  []{ hotend_pick(RF_HOTEND_E3D); });
+  END_MENU();
+}
+
 static void menu_rf_pid() {
   START_MENU();
   BACK_ITEM_F(F("Konfiguration"));
   if (!printingIsActive()) {
+    SUBMENU_F(F(TERN(HAS_MULTI_HOTEND, "Hotend E0", "Hotend")), []{ hotend_e = 0; ui.goto_screen(menu_rf_hotend_type); });
+    #if HAS_MULTI_HOTEND
+      SUBMENU_F(F("Hotend E1"), []{ hotend_e = 1; ui.goto_screen(menu_rf_hotend_type); });
+    #endif
     GCODES_ITEM_F(F("PID Extruder 0"), F("M303 E0 S210 C8 U1\nM500"));
     #if HAS_MULTI_HOTEND
       GCODES_ITEM_F(F("PID Extruder 1"), F("M303 E1 S210 C8 U1\nM500"));

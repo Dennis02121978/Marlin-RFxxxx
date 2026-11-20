@@ -39,6 +39,9 @@
  *  M3909 [P] [S] [D]         sense offset: P threshold digits, S max offset um. P0 = off.
  *                            Switches on for the running print unless D1 (only store the values).
  *  M3911 [S] [F] [L] [H]     digit flow compensation: S flow %, F speed %, L/H digits range
+ *  M3930 [S<1..4>] [T<e>] [A0]  hotend type like RF Repetier menu "Sens.": 1 V1, 2 V2 (stock), 3 V3 (NTC 3950),
+ *                            4 E3D (Semitec 104GT-2). Sets thermistor (M305) and PID (M301); A0 = only store the type.
+ *                            Not saved, M500 saves. Without S: report.
  *  M3922 [R V] [X Y Z E]     DRV8711 registers (test): without R read back registers 0..7 of all drivers,
  *                            R<0..6> V<value, decimal> writes one register (default X and Y, not stored,
  *                            a reset or M350/M906 writes the firmware values again)
@@ -235,6 +238,18 @@ bool rf_process_mcode(const uint16_t code) {
       if (parser.seenval('P')) rf.set_output(constrain(parser.value_byte(), 1, 3), parser.boolval('S'));
       break;
     case 3301: rf.set_output(0, parser.boolval('S')); break;
+
+    case 3930: {
+      const uint8_t e = parser.seenval('T') ? parser.value_byte() : 0;
+      if (e >= EXTRUDERS) break;
+      if (parser.seenval('S')) {
+        const uint8_t t = parser.value_byte();
+        if (!WITHIN(t, 1, RF_HOTEND_TYPES)) { SERIAL_ECHOLNPGM("M3930: S1 V1, S2 V2, S3 V3, S4 E3D"); break; }
+        rf.set_hotend(e, t, parser.boolval('A', true));
+      }
+      SERIAL_ECHOPGM("Hotend T", e, ": ");
+      SERIAL_ECHOLNF(rf.hotend_name(rf.settings.hotend[e]));
+    } break;
 
     case 3909: {
       const int16_t thr = parser.seenval('P') ? constrain(parser.value_int(), 0, 32000) : rf.settings.sense_threshold;

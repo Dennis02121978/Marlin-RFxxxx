@@ -98,7 +98,8 @@
  *  RF_MODEL           RF_MODEL_RF1000, RF_MODEL_RF2000 or RF_MODEL_RF2000V2
  *  RF_DUAL_EXTRUDER   enable for two extruders
  *  RF_FILAMENT_DIA    1.75, 2.85 or 3.00 mm
- *  RF_HOTEND          installed hotend, like the RF Repetier menu "Sens." / EXT0_HOTEND_TYPE:
+ *  RF_HOTEND          installed hotend at the first start, like RF Repetier EXT0_HOTEND_TYPE. Changeable at
+ *                     runtime: menu Konfiguration -> Temperaturen PID -> Hotend, or M3930 S1..4 (stored):
  *                       RF_HOTEND_V1   Renkforce hotend V1 (Repetier sensor 3, PID HT2)
  *                       RF_HOTEND_V2   Renkforce hotend V2, EPCOS G550 100k (Repetier sensor 3, PID HT3) = stock
  *                       RF_HOTEND_V3   Conrad hotend V3, NTC 3950 100k (Repetier sensor 13, PID HT4)
@@ -130,7 +131,7 @@
 #define RF_MODEL RF_MODEL_RF2000
 //#define RF_DUAL_EXTRUDER
 #define RF_FILAMENT_DIA        2.85   // mm
-#define RF_HOTEND      RF_HOTEND_V2   // V1, V2 (stock), V3 or E3D (thermistor table and PID like RF Repetier)
+#define RF_HOTEND      RF_HOTEND_V2   // V1, V2 (stock), V3 or E3D at first start (menu / M3930 at runtime)
 //#define RF_X_MAX              240   // mm, X travel (RF Repetier X_MAX_LENGTH_PRINT, single RF1000/RF2000 measured 240)
 //#define RF_Y_MAX              245   // mm, Y travel (RF Repetier Y_MAX_LENGTH)
 //#define RF_Z_MAX              200   // mm, Z travel (RF Repetier Z_MAX_LENGTH)
@@ -700,21 +701,14 @@
  *   998 : Dummy Table that ALWAYS reads 25°C or the temperature defined below.
  *   999 : Dummy Table that ALWAYS reads 100°C or the temperature defined below.
  */
-// RF: sensor like RF Repetier (Extruder.cpp temptable_3 = Marlin table 3, identical values).
-//     Hotend V3: Repetier temptable_13 (NTC 3950) -> custom 1000 with beta 4200 (fit, within 1.5 C at 150..280 C).
-//     Before v1.0.8 the hotends used custom beta 4150, which read ~6 C too high at 230 C.
+// RF: hotends use the custom thermistor 1000 (Steinhart-Hart, values in EEPROM, M305), so the hotend type can be
+//     switched at runtime like the RF Repetier menu "Sens.". The values per type are fits to the Repetier tables
+//     (Extruder.cpp temptable_3 / 13 / 8), max. deviation 1.1 C at 150..280 C. Table: renkforce.cpp rf_hotends[].
 #ifndef RF_HOTEND
   #define RF_HOTEND RF_HOTEND_V2
 #endif
-#if RF_HOTEND == RF_HOTEND_V3
-  #define RF_HOTEND_SENSOR 1000
-#elif RF_HOTEND == RF_HOTEND_E3D
-  #define RF_HOTEND_SENSOR 5     // ATC Semitec 104GT-2 (Repetier sensor 8)
-#else
-  #define RF_HOTEND_SENSOR 3     // Renkforce hotend V1/V2, mendel-parts / EPCOS (Repetier sensor 3)
-#endif
-#define TEMP_SENSOR_0 RF_HOTEND_SENSOR
-#define TEMP_SENSOR_1 TERN(RF_DUAL_EXTRUDER, RF_HOTEND_SENSOR, 0)
+#define TEMP_SENSOR_0 1000
+#define TEMP_SENSOR_1 TERN(RF_DUAL_EXTRUDER, 1000, 0)
 #define TEMP_SENSOR_2 0
 #define TEMP_SENSOR_3 0
 #define TEMP_SENSOR_4 0
@@ -849,6 +843,7 @@
     #define DEFAULT_KD_LIST { 114.00, 114.00 }
   #else
     // RF Repetier Configuration.h (same units: Ki per second, Kd in seconds). Better: M303 E0 S220 C8 U1, then M500
+    // Same values as renkforce.cpp rf_hotends[] (M3930 sets them at runtime)
     #if RF_HOTEND == RF_HOTEND_V1
       #define DEFAULT_KP  37.52   // HT2_PID_*
       #define DEFAULT_KI  10.00

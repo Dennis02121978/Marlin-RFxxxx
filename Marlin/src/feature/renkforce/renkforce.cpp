@@ -145,6 +145,7 @@ void Renkforce::reset_settings() {
   settings.rgb_mode = RF_RGB_AUTO;
   for (uint8_t c = 0; c < RF_RGB_COLORS; ++c) for (uint8_t i = 0; i < 3; ++i) settings.rgb[c][i] = rgb_def[c][i];
   settings.case_light = ENABLED(CASE_LIGHT_DEFAULT_ON);
+  for (uint8_t e = 0; e < EXTRUDERS; ++e) settings.hotend[e] = RF_HOTEND;   // M305/M301 defaults follow RF_HOTEND too
   apply_settings();
 }
 
@@ -155,11 +156,46 @@ void Renkforce::apply_settings() {
   }
   if (settings.probe_trigger < 5) settings.probe_trigger = RF_LOADCELL_TRIGGER;
   if (settings.rgb_mode > RF_RGB_MANUAL) settings.rgb_mode = RF_RGB_AUTO;
+  for (uint8_t e = 0; e < EXTRUDERS; ++e) if (!WITHIN(settings.hotend[e], 1, RF_HOTEND_TYPES)) settings.hotend[e] = RF_HOTEND;
   TERN_(CASE_LIGHT_ENABLE, caselight.on = settings.case_light);   // caselight.init() follows in setup
   #if PIN_EXISTS(RF_RGB_R)
     if (ready) rf_rgb.set_mode(settings.rgb_mode);
   #endif
   rf_drv.refresh();   // no reset at runtime, the drivers would lose their microstep position
+}
+
+//
+// Hotend type (RF Repetier menu "Sens.", EXT0_HOTEND_TYPE): thermistor (custom 1000, M305) and PID (M301)
+//   Thermistor values: Steinhart-Hart fits to the Repetier tables with 4.7k pull-up, max. 1.1 C off at 150..280 C.
+//
+static const rf_hotend_t rf_hotends[RF_HOTEND_TYPES] = {
+  { 96457.6f, 4804.12f, 1.2998e-7f, 37.52f, 10.00f, 35.18f },   // V1:  Repetier sensor 3, PID HT2
+  { 96457.6f, 4804.12f, 1.2998e-7f, 12.50f,  3.20f, 18.00f },   // V2:  Repetier sensor 3, PID HT3 (stock)
+  { 97605.0f, 4643.66f, 1.0327e-7f, 17.11f,  2.05f, 35.75f },   // V3:  Repetier sensor 13 (NTC 3950), PID HT4
+  { 98236.1f, 4734.76f, 7.5708e-8f, 12.50f,  3.20f, 18.00f }    // E3D: Repetier sensor 8 (Semitec 104GT-2), PID start HT3
+};
+
+FSTR_P Renkforce::hotend_name(const uint8_t type) {
+  switch (type) {
+    case RF_HOTEND_V1:  return F("V1");
+    case RF_HOTEND_V2:  return F("V2 Original");
+    case RF_HOTEND_V3:  return F("V3 NTC3950");
+    case RF_HOTEND_E3D: return F("E3D 104GT2");
+    default:            return F("?");
+  }
+}
+
+void Renkforce::set_hotend(const uint8_t e, const uint8_t type, const bool apply) {
+  if (e >= EXTRUDERS || !WITHIN(type, 1, RF_HOTEND_TYPES)) return;
+  settings.hotend[e] = type;
+  if (!apply) return;
+  const rf_hotend_t &h = rf_hotends[type - 1];
+  const uint8_t ti = e;   // CTI_HOTEND_0 / CTI_HOTEND_1 come first in the custom thermistor list
+  thermalManager.set_pull_up_res(ti, 4700);
+  thermalManager.set_res25(ti, h.r25);
+  thermalManager.set_beta(ti, h.beta);
+  thermalManager.set_sh_coeff(ti, h.shc);
+  thermalManager.setPID(e, h.kp, h.ki, h.kd);   // shared by both hotends (no PID_PARAMS_PER_HOTEND)
 }
 
 void Renkforce::before_save() {
@@ -186,6 +222,11 @@ void Renkforce::report_settings(const bool forReplay) {
   SERIAL_ECHOLNPGM(" L", settings.pause_min, " H", settings.pause_max);
   _RF_ECHO_CMD("  M3105");
   SERIAL_ECHOLNPGM(" X", settings.pause_pos[0], " Y", settings.pause_pos[1], " Z", settings.pause_pos[2]);
+  if (!forReplay) { SERIAL_ECHO_MSG("; Renkforce hotend type (1 V1, 2 V2, 3 V3, 4 E3D), A0 = only store:"); }
+  for (uint8_t e = 0; e < EXTRUDERS; ++e) {
+    _RF_ECHO_CMD("  M3930");
+    SERIAL_ECHOLNPGM(" T", e, " S", settings.hotend[e], " A0");
+  }
   _RF_ECHO_CMD("  M3909");
   SERIAL_ECHOLNPGM(" P", settings.sense_threshold, " S", settings.sense_max_um, " A", settings.sense_auto, " D1");
   _RF_ECHO_CMD("  M3911");

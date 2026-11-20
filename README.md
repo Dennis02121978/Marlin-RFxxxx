@@ -132,6 +132,12 @@ Hinweise dazu:
   Ein echter Retract nach `G1 E5` wäre `G1 E3`, das Zurückschieben `G1 E5` (so schreibt es der Config Creator).
 - Dual: `M104 S0` schaltet nur die aktive Düse ab. Sicherer: `M104 S0 T0` und `M104 S0 T1`.
 
+### Hotend wählen (ab v1.0.9)
+
+Menü **Konfiguration → Temperaturen PID → Hotend**: V1, V2 Original, V3 NTC3950 oder E3D 104GT2 (wie im
+RF-Repetier-Menü „Sens.“). Wird sofort gespeichert und setzt Thermistor und PID. Per G-Code: `M3930 S1` (V1),
+`S2` (V2), `S3` (V3), `S4` (E3D), bei Dual mit `T1` für die zweite Düse, danach `M500`.
+
 ### USB-Host (OctoPrint, Repetier-Server)
 
 OctoPrint schickt jede Zeile erst nach dem „ok“ der vorherigen. Der FTDI-Chip des RF-Boards hält Antworten

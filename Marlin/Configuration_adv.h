@@ -71,18 +71,32 @@
 //
 // Custom Thermistor 1000 parameters
 //
+// RF: Steinhart-Hart fits to the RF Repetier tables (4.7k pull-up), same as renkforce.cpp rf_hotends[]
+#if RF_HOTEND == RF_HOTEND_V3          // Repetier temptable_13 (NTC 3950, Conrad V3)
+  #define RF_HT_R25   97605.0
+  #define RF_HT_BETA   4643.66
+  #define RF_HT_SHC    1.0327e-7
+#elif RF_HOTEND == RF_HOTEND_E3D       // Repetier temptable_8 (E3D, ATC Semitec 104GT-2)
+  #define RF_HT_R25   98236.1
+  #define RF_HT_BETA   4734.76
+  #define RF_HT_SHC    7.5708e-8
+#else                                  // Repetier temptable_3 (Renkforce hotend V1/V2) = Marlin table 3
+  #define RF_HT_R25   96457.6
+  #define RF_HT_BETA   4804.12
+  #define RF_HT_SHC    1.2998e-7
+#endif
 #if TEMP_SENSOR_0 == 1000
   #define HOTEND0_PULLUP_RESISTOR_OHMS    4700 // Pullup resistor
-  #define HOTEND0_RESISTANCE_25C_OHMS   100000 // Resistance at 25C
-  #define HOTEND0_BETA                    4200 // RF hotend V3 (NTC 3950): fit to RF Repetier temptable_13
-  #define HOTEND0_SH_C_COEFF                 0 // Steinhart-Hart C coefficient
+  #define HOTEND0_RESISTANCE_25C_OHMS   RF_HT_R25
+  #define HOTEND0_BETA                  RF_HT_BETA
+  #define HOTEND0_SH_C_COEFF            RF_HT_SHC
 #endif
 
 #if TEMP_SENSOR_1 == 1000
   #define HOTEND1_PULLUP_RESISTOR_OHMS    4700 // Pullup resistor
-  #define HOTEND1_RESISTANCE_25C_OHMS   100000 // Resistance at 25C
-  #define HOTEND1_BETA                    4200 // RF hotend V3 (see HOTEND0)
-  #define HOTEND1_SH_C_COEFF                 0 // Steinhart-Hart C coefficient
+  #define HOTEND1_RESISTANCE_25C_OHMS   RF_HT_R25
+  #define HOTEND1_BETA                  RF_HT_BETA
+  #define HOTEND1_SH_C_COEFF            RF_HT_SHC
 #endif
 
 #if TEMP_SENSOR_2 == 1000
@@ -4352,6 +4366,6 @@
   // Boot screen like the Klipper display (rf_display.cfg: rf_splash, _RF_INFO)
   #define RF_BOOTSCREEN
   #define RF_BOOT_TITLE   "3D-Artmaker"
-  #define RF_BOOT_VERSION "v1.0.8"   // Marlin-RFxxxx release
+  #define RF_BOOT_VERSION "v1.0.9"   // Marlin-RFxxxx release
   #define RF_BOOT_STAND   "20.11.2026"
 #endif

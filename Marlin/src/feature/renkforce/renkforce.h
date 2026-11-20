@@ -53,7 +53,12 @@ typedef struct {
   uint8_t  rgb_mode;                      // 0 off, 1 white, 2 auto, 3 manual  M3308
   uint8_t  rgb[5][3];                     // heating, printing, cooling, idle, manual  M3303..M3307
   bool     case_light;                    // X19 light at power on  M355
+  uint8_t  hotend[EXTRUDERS];             // RF_HOTEND_V1..E3D per extruder  M3930
 } rf_settings_t;
+
+// Hotend types like the RF Repetier menu "Sens." (thermistor fit + PID of Repetier HT2/HT3/HT4)
+typedef struct { float r25, beta, shc, kp, ki, kd; } rf_hotend_t;
+#define RF_HOTEND_TYPES 4
 
 class Renkforce {
 public:
@@ -84,6 +89,8 @@ public:
 
   // Microsteps changed: keep mm, rescale steps/mm (RF Repetier FEATURE_ADJUSTABLE_MICROSTEPS)
   static void change_microsteps(const uint8_t d, const uint16_t ms);
+  static void set_hotend(const uint8_t e, const uint8_t type, const bool apply);   // M3930 / menu
+  static FSTR_P hotend_name(const uint8_t type);
 
   static void sense_enable(const int16_t threshold, const uint16_t max_um);
   static uint8_t status_page;          // RF info page on the status screen
