@@ -1231,7 +1231,7 @@ FORCE_INLINE void segment_idle(millis_t &next_idle_ms) {
   inline bool line_to_destination_cartesian() {
     const float scaled_fr_mm_s = MMS_SCALED(feedrate_mm_s);
     #if HAS_MESH
-      if (planner.leveling_active && planner.leveling_active_at_z(destination.z)) {
+      if (DISABLED(RF_ZCOMP_STEPPER) && planner.leveling_active && planner.leveling_active_at_z(destination.z)) {
         #if ENABLED(AUTO_BED_LEVELING_UBL)
           #if UBL_SEGMENTED
             return bedlevel.line_to_destination_segmented(scaled_fr_mm_s);

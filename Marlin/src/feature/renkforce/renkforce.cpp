@@ -31,6 +31,7 @@
 #include "../../gcode/queue.h"
 #include "../../lcd/marlinui.h"
 #include "../babystep.h"
+#include "../bedlevel/bedlevel.h"
 #include "../../module/endstops.h"
 #include "../../module/settings.h"
 #include "../../libs/buzzer.h"
@@ -285,9 +286,44 @@ void Renkforce::on_homing() {
 //
 // Called from idle()
 //
+#if ENABLED(RF_ZCOMP_STEPPER)
+
+  int32_t Renkforce::zcomp_applied = 0;
+
+  // Like RF Repetier recalculateHeatBedZCompensation(): the moves stay as they are, Z follows the matrix height at
+  // the position the steppers really are (not the queue), faded out up to the fade height (M420 Z, default 10 mm).
+  void Renkforce::zcomp_update() {
+    if (!all_axes_trusted()) { zcomp_applied = 0; return; }   // position lost (G28, motors off): nothing to take back
+    int32_t target = 0;
+    if (planner.leveling_active && bedlevel.has_mesh()) {
+      const xyz_pos_t p = { planner.get_axis_position_mm(X_AXIS), planner.get_axis_position_mm(Y_AXIS), planner.get_axis_position_mm(Z_AXIS) };
+      const float f = planner.fade_scaling_factor_for_z(p.z);
+      if (f) target = LROUND(f * bedlevel.get_z_correction(p) * planner.settings.axis_steps_per_mm[Z_AXIS]);
+    }
+    const int32_t d = constrain(target - zcomp_applied, -15000L, 15000L);
+    if (!d) return;
+    CRITICAL_SECTION_START();
+    babystep.steps[BS_AXIS_IND(Z_AXIS)] += int16_t(d);          // + = nozzle away from the bed, like the planner correction
+    CRITICAL_SECTION_END();
+    zcomp_applied += d;
+  }
+
+  void Renkforce::zcomp_sync() {
+    zcomp_update();
+    const millis_t timeout = millis() + 20000UL;
+    while (babystep.steps[BS_AXIS_IND(Z_AXIS)] && PENDING(millis(), timeout)) idle();
+  }
+
+#endif
+
 void Renkforce::idle() {
   if (!ready) return;   // idle() also runs during setup, before Wire and the pins are set up
   const millis_t ms = millis();
+
+  #if ENABLED(RF_ZCOMP_STEPPER)
+    static millis_t zcomp_next_ms;
+    if (ELAPSED(ms, zcomp_next_ms)) { zcomp_next_ms = ms + 2; zcomp_update(); }
+  #endif
 
   if (rf_loadcell.update()) handle_sample();
 

@@ -79,6 +79,11 @@ public:
 
   static void init();                  // after stepper.init()
   static void idle();                  // from idle()
+  #if ENABLED(RF_ZCOMP_STEPPER)
+    static void zcomp_update();        // Z compensation like RF Repetier (babysteps to the matrix height at the real XY)
+    static void zcomp_sync();          // update and wait until Z is there
+    static int32_t zcomp_applied;      // steps given to Z by the compensation
+  #endif
   static void on_homing();             // G28 start
 
   static void pause_print(const bool emergency);

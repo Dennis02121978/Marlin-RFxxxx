@@ -426,6 +426,9 @@ public:
     #if HAS_WIRED_LCD
 
       static millis_t next_button_update_ms;
+      #if ENABLED(RENKFORCE_RF)
+        static volatile screenFunc_t rf_select_screen;   // screen that showed a yes/no selection (left/right keys select)
+      #endif
 
       static LCDViewAction lcdDrawUpdate;
       FORCE_INLINE static bool should_draw() { return bool(lcdDrawUpdate); }

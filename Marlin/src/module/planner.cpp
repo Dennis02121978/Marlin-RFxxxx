@@ -1604,7 +1604,7 @@ void Planner::check_axes_activity() {
    *              Leveled XYZ on completion
    */
   void Planner::apply_leveling(xyz_pos_t &raw) {
-    if (!leveling_active) return;
+    if (!leveling_active || ENABLED(RF_ZCOMP_STEPPER)) return;   // RF: Z compensation in the background (renkforce.cpp)
 
     #if ABL_PLANAR
 
@@ -1627,7 +1627,7 @@ void Planner::check_axes_activity() {
   }
 
   void Planner::unapply_leveling(xyz_pos_t &raw) {
-    if (!leveling_active) return;
+    if (!leveling_active || ENABLED(RF_ZCOMP_STEPPER)) return;   // RF: Z compensation in the background (renkforce.cpp)
 
     #if ABL_PLANAR
 

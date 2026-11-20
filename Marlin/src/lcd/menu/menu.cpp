@@ -355,6 +355,7 @@ void MenuItem_confirm::select_screen(
   FSTR_P const fpre, const char * const string/*=nullptr*/, FSTR_P const fsuf/*=nullptr*/
 ) {
   ui.defer_status_screen();
+  TERN_(RENKFORCE_RF, ui.rf_select_screen = ui.currentScreen);
   const bool ui_selection = !yes ? false : !no || ui.update_selection(),
              got_click = ui.use_click();
   if (got_click || ui.should_draw()) {

@@ -72,6 +72,12 @@ Serielle Verbindung zum Host **250000 Baud** (bis v1.0.3: 115200). Flashen über
     eingeschaltet (wie Klipper mit `bed_mesh_init`, Display zeigt „Kmp“). Abschalten mit `M3000`.
   - `M3009 S<1..9>` Platz wählen und laden, `M3011 [S]` löschen, `M3013 [S<Platz>] [P1]` ausgeben wie Repetier (`P1` = mm),
     `M3014 [S]` speichern, `M3000`/`M3001` Kompensation aus/an.
+  - Ab v1.0.10 rechnet die Kompensation wie Repetier (`RF_ZCOMP_STEPPER`, Configuration_adv.h): Der Planer
+    bekommt die Fahrten unverändert und ungeteilt, `renkforce.cpp` (`zcomp_update`) liest alle 2 ms die
+    tatsächliche XY-Position der Motoren und gibt Z die Differenz zur Matrix als Babysteps (Temperatur-ISR,
+    etwa 1000 Schritte/s). Auslaufen über die Höhe wie bisher (`M420 Z`, Standard 10 mm). Ein-/Ausschalten
+    wartet, bis Z angekommen ist (vor G28 und dem Scan wird die Korrektur ganz zurückgenommen). `M114` zeigt
+    die Koordinaten ohne Korrektur. Vorher zerlegte Marlin jede Fahrt in 5-mm-Stücke, das Bett ruckte dabei.
 - `M3060` prüft, ob 0x49 (DMS), 0x50 und 0x51 antworten.
 
 ## Heizbett-Scan wie Repetier (`M3010`, `G29`)

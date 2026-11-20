@@ -4346,6 +4346,11 @@
   #endif
   #define RF_FLOW_COMP_MIN_Z        0.2   // mm, only above this Z
 
+  // Z compensation like RF Repetier: moves are not changed or split, Z follows the heat bed matrix at the
+  // real XY position of the steppers in the background (babysteps, ~1000 steps/s). Without it Marlin splits
+  // every move and Z (the bed) jerks at every piece.
+  #define RF_ZCOMP_STEPPER
+
   // Keys next to the display (values of the Klipper macros z_jog / _E_KEY)
   #define RF_KEY_Z_STEP           0.03    // mm per press
   #define RF_KEY_Z_STEP_SPEED      3.0    // mm/s
@@ -4367,6 +4372,6 @@
   // Boot screen like the Klipper display (rf_display.cfg: rf_splash, _RF_INFO)
   #define RF_BOOTSCREEN
   #define RF_BOOT_TITLE   "3D-Artmaker"
-  #define RF_BOOT_VERSION "v1.0.9"   // Marlin-RFxxxx release
+  #define RF_BOOT_VERSION "v1.0.10"   // Marlin-RFxxxx release
   #define RF_BOOT_STAND   "20.11.2026"
 #endif

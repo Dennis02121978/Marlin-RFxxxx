@@ -42,6 +42,10 @@
 #define DEBUG_OUT ENABLED(DEBUG_LEVELING_FEATURE)
 #include "../../core/debug_out.h"
 
+#if ENABLED(RF_ZCOMP_STEPPER)
+  #include "../renkforce/renkforce.h"
+#endif
+
 #if ENABLED(EXTENSIBLE_UI)
   #include "../../lcd/extui/ui_api.h"
 #endif
@@ -81,6 +85,7 @@ void set_bed_leveling_enabled(const bool enable/*=true*/) {
     planner.unapply_modifiers(current_position, true);  // Logical position with modifiers removed
 
     sync_plan_position();
+    TERN_(RF_ZCOMP_STEPPER, rf.zcomp_sync());   // RF: Z at the compensated / uncompensated height before the next move
     _report_leveling();
   }
 }

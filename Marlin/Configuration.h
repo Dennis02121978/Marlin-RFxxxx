@@ -2151,7 +2151,9 @@
    * split up moves into short segments like a Delta. This follows the
    * contours of the bed more closely than edge-to-edge straight moves.
    */
-  #define SEGMENT_LEVELED_MOVES
+  // RF: off. The Z compensation runs like RF Repetier in the background (RF_ZCOMP_STEPPER, Configuration_adv.h),
+  // moves are not split at all.
+  //#define SEGMENT_LEVELED_MOVES
   #define LEVELED_SEGMENT_LENGTH 5.0 // (mm) Length of all segments (except the last one)
 
   /**

@@ -239,6 +239,9 @@ void MarlinUI::init() {
     #if BUTTON_EXISTS(BACK)
       SET_INPUT_PULLUP(BTN_BACK);
     #endif
+    #if ENABLED(RENKFORCE_RF) && PIN_EXISTS(RF_KEY_RIGHT)
+      SET_INPUT_PULLUP(RF_KEY_RIGHT_PIN);
+    #endif
     #if BUTTON_EXISTS(UP)
       SET_INPUT(BTN_UP);
     #endif
@@ -343,6 +346,9 @@ void MarlinUI::init() {
   #endif
 
   millis_t MarlinUI::next_button_update_ms; // = 0
+  #if ENABLED(RENKFORCE_RF)
+    volatile screenFunc_t MarlinUI::rf_select_screen; // = nullptr
+  #endif
 
   #if HAS_MARLINUI_U8GLIB
     bool MarlinUI::drawing_screen, MarlinUI::first_page; // = false
@@ -1306,11 +1312,17 @@ void MarlinUI::init() {
 
           #if ANY_BUTTON(EN1, EN2, ENC, BACK)
 
+            // RF: on a yes/no screen (e.g. SD "Drucken / Abbrechen") the keys left (back) and right move the selection
+            #if ENABLED(RENKFORCE_RF)
+              const bool rf_select = rf_select_screen && rf_select_screen == currentScreen;
+            #else
+              constexpr bool rf_select = false;
+            #endif
             uint8_t newbutton = 0;
             if (BUTTON_PRESSED(EN1))                 newbutton |= EN_A;
             if (BUTTON_PRESSED(EN2))                 newbutton |= EN_B;
             if (can_encode() && BUTTON_PRESSED(ENC)) newbutton |= EN_C;
-            if (BUTTON_PRESSED(BACK))                newbutton |= EN_D;
+            if (BUTTON_PRESSED(BACK) && !rf_select)  newbutton |= EN_D;
 
           #else
 
@@ -1341,6 +1353,17 @@ void MarlinUI::init() {
               encoderDiff = pulses;
               next_button_update_ms = now + 300;
             }
+            #if ENABLED(RENKFORCE_RF) && PIN_EXISTS(RF_KEY_RIGHT)
+              // yes/no screen: right = right button (like "up" did before), left/back = left button
+              else if (rf_select && !READ(RF_KEY_RIGHT_PIN)) {
+                encoderDiff = (ENCODER_STEPS_PER_MENU_ITEM) * pulses;
+                next_button_update_ms = now + 300;
+              }
+              else if (rf_select && BUTTON_PRESSED(BACK)) {
+                encoderDiff = -(ENCODER_STEPS_PER_MENU_ITEM) * pulses;
+                next_button_update_ms = now + 300;
+              }
+            #endif
 
           #endif // UP || DOWN || LEFT || RIGHT
 
