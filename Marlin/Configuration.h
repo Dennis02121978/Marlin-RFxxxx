@@ -97,6 +97,8 @@
  *
  *  RF_MODEL           RF_MODEL_RF1000, RF_MODEL_RF2000 or RF_MODEL_RF2000V2
  *  RF_DUAL_EXTRUDER   enable for two extruders
+ *  RF_DUAL_CARRIAGE   dual carriage with only one hotend in the left place (T0): one extruder, but X like dual
+ *                     (home X = -RF_T1_OFFSET_X, X max 200 / v2 170), so the nozzle reaches the bed like T0 of a dual
  *  RF_FILAMENT_DIA    1.75, 2.85 or 3.00 mm
  *  RF_HOTEND          installed hotend at the first start, like RF Repetier EXT0_HOTEND_TYPE. Changeable at
  *                     runtime: menu Konfiguration -> Temperaturen PID -> Hotend, or M3930 S1..4 (stored):
@@ -130,6 +132,7 @@
 // ==== BEGIN RF CONFIG CREATOR ====
 #define RF_MODEL RF_MODEL_RF2000
 //#define RF_DUAL_EXTRUDER
+//#define RF_DUAL_CARRIAGE            // dual carriage, only one hotend (left, T0)
 #define RF_FILAMENT_DIA        2.85   // mm
 #define RF_HOTEND      RF_HOTEND_V2   // V1, V2 (stock), V3 or E3D at first start (menu / M3930 at runtime)
 //#define RF_X_MAX              240   // mm, X travel (RF Repetier X_MAX_LENGTH_PRINT, single RF1000/RF2000 measured 240)
@@ -149,6 +152,13 @@
 #define RF_FLOW_COMP_MAX       1540   // digits (M3911 H)
 // ==== END RF CONFIG CREATOR ====
 
+#if BOTH(RF_DUAL_EXTRUDER, RF_DUAL_CARRIAGE)
+  #error "RF_DUAL_EXTRUDER and RF_DUAL_CARRIAGE: choose one (RF_DUAL_CARRIAGE = dual carriage with one hotend)."
+#endif
+#if EITHER(RF_DUAL_EXTRUDER, RF_DUAL_CARRIAGE)
+  #define RF_DUAL_GEO      // X geometry of the dual carriage
+#endif
+
 #define RENKFORCE_RF     // RF features: DRV8711, load cell, keys, emergency pause, sense offset ...
 
 #if RF_MODEL == RF_MODEL_RF1000
@@ -156,7 +166,7 @@
   #define RF_IS_RF1000
   #define RF_MACHINE_NAME "RF1000"
   #ifndef RF_X_MAX
-    #define RF_X_MAX   TERN(RF_DUAL_EXTRUDER, 200, 240)   // measured on the printer (Repetier: 245)
+    #define RF_X_MAX   TERN(RF_DUAL_GEO, 200, 240)   // measured on the printer (Repetier: 245)
   #endif
   #ifndef RF_Y_MAX
     #define RF_Y_MAX   245
@@ -173,7 +183,7 @@
   #define RF_IS_RF2000
   #define RF_MACHINE_NAME "RF2000"
   #ifndef RF_X_MAX
-    #define RF_X_MAX   TERN(RF_DUAL_EXTRUDER, 200, 240)   // measured on the printer (Repetier: 230)
+    #define RF_X_MAX   TERN(RF_DUAL_GEO, 200, 240)   // measured on the printer (Repetier: 230)
   #endif
   #ifndef RF_Y_MAX
     #define RF_Y_MAX   245
@@ -189,7 +199,7 @@
   #define MOTHERBOARD BOARD_RENKFORCE_RF2000
   #define RF_MACHINE_NAME "RF2000 v2"
   #ifndef RF_X_MAX
-    #define RF_X_MAX   TERN(RF_DUAL_EXTRUDER, 170, 230)
+    #define RF_X_MAX   TERN(RF_DUAL_GEO, 170, 230)
   #endif
   #ifndef RF_Y_MAX
     #define RF_Y_MAX   290
@@ -207,7 +217,7 @@
   #error "RF_Y_HOME / RF_Y_TRAVEL / RF_Z_MIN are gone: Y=0 is the Y switch like RF Repetier, use RF_Y_MAX (new Config Creator)."
 #endif
 
-#if ENABLED(RF_DUAL_EXTRUDER)
+#if ENABLED(RF_DUAL_GEO)
   #ifndef RF_T1_OFFSET_X
     #define RF_T1_OFFSET_X RF_T1_DEFAULT_X
   #endif
@@ -224,8 +234,8 @@
 
 // Heat bed scan like RF Repetier (HEAT_BED_SCAN_*): X/Y from the switch (= Marlin X/Y), every 20 mm
 // up to the axis length minus the end margin. The Marlin mesh is exactly this grid.
-#define RF_SCAN_X_START  TERN(RF_DUAL_EXTRUDER, 0, 15)
-#define RF_SCAN_X_END    TERN(RF_DUAL_EXTRUDER, 0, 5)
+#define RF_SCAN_X_START  TERN(RF_DUAL_GEO, 0, 15)
+#define RF_SCAN_X_END    TERN(RF_DUAL_GEO, 0, 5)
 #define RF_SCAN_Y_START  30
 #define RF_SCAN_Y_END    5
 #define RF_SCAN_STEP     20
