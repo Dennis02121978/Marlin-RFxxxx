@@ -43,8 +43,8 @@ Repetier auf Z max und Y 245.
 
 ## Geschwindigkeit und Beschleunigung
 
-X/Y höchstens **150 mm/s** und **1200 mm/s²** (`DEFAULT_MAX_FEEDRATE`, `DEFAULT_MAX_ACCELERATION`, Druck- und
-Fahrbeschleunigung 1200). Die Grenzen sind fest: `M203`/`M201` (auch vom Slicer) und das Menü können sie nicht
+X/Y höchstens **200 mm/s** und **1000 mm/s²** (`DEFAULT_MAX_FEEDRATE`, `DEFAULT_MAX_ACCELERATION`, Druck- und
+Fahrbeschleunigung 1000, ab v1.0.11; vorher 150 mm/s und 1200 mm/s²). Motorstrom ab Werk X/Y/Z/E 1800 mA (`RF_DRV8711_CURRENT`). Die Grenzen sind fest: `M203`/`M201` (auch vom Slicer) und das Menü können sie nicht
 überschreiten (`LIMITED_MAX_FR_EDITING`, `LIMITED_MAX_ACCEL_EDITING`), ältere Werte aus dem EEPROM werden beim
 Laden darauf begrenzt. Im Slicer am besten bis **130 mm/s**: Über USB schafft der ATmega2560 nur etwa 110 kurze
 Segmente (1 mm) pro Sekunde, darüber läuft der Puffer leer und Rundungen ruckeln. Abhilfe: in Orca „Arc fitting“

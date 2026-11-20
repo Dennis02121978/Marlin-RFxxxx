@@ -14,7 +14,7 @@ DRV8711-Treiber, DMS/Wägezelle). Single oder Dual Extruder.
   (9 Plätze, Repetier und Marlin lesen die Matrizen gegenseitig), Z-Offset-Scan `M3900`
 - DRV8711-Motorstrom und Mikroschritte (`M906`, `M350`, `M122`, Register lesen/testen `M3922`), Mikroschritte X/Y/Z 1/16, E 1/32,
   im Menü Konfiguration → Mikroschritte änderbar
-- Bauraum und Home wie Repetier (0 = Schalter); X/Y fest höchstens 150 mm/s und 1200 mm/s²
+- Bauraum und Home wie Repetier (0 = Schalter); X/Y höchstens 200 mm/s und 1000 mm/s², Motorstrom X/Y/Z/E 1,8 A
 - Z-Kompensation wie Repetier (ab v1.0.10): Die Fahrten bleiben unverändert, Z folgt der Matrix im Hintergrund
   an der tatsächlichen Kopfposition. Kein Ruckeln mehr durch zerlegte Fahrten.
 - Notfall-Pause, Sense Offset, Digit-Flow-Kompensation (`M3075`, `M3909`, `M3911`)

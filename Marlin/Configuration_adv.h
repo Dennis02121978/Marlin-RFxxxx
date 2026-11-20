@@ -4296,12 +4296,12 @@
    * DRV8711 stepper drivers (M906 current, M350 microsteps, M122 status)
    * Current in mA. RF Repetier MOTOR_CURRENT_NORMAL (TORQUE register 0..255, 126 = ~2 A):
    *   RF2000 / RF2000 v2: 110, 110, 105, 90, 90   RF1000: 110, 110, 105, 110, 110
-   * Klipper configs of the Config Creator: 2000 mA X/Y/Z, 1800 mA extruders.
+   * Klipper configs of the Config Creator: 2000 mA X/Y/Z, 1800 mA extruders. Marlin default: 1800 mA for all.
    */
   #if ENABLED(RF_IS_RF1000)
-    #define RF_DRV8711_CURRENT    { 1790, 1790, 1709, 1790, 1790 }   // X, Y, Z, E0, E1 (mA)
+    #define RF_DRV8711_CURRENT    { 1800, 1800, 1800, 1800, 1800 }   // X, Y, Z, E0, E1 (mA)
   #else
-    #define RF_DRV8711_CURRENT    { 1790, 1790, 1709, 1465, 1465 }
+    #define RF_DRV8711_CURRENT    { 1800, 1800, 1800, 1800, 1800 }
   #endif
   #define RF_DRV8711_CURRENT_LIMIT  2440      // mA, RF Repetier MOTOR_CURRENT_MAX 150
   #define RF_DRV8711_MICROSTEPS { 16, 16, 16, 32, 32 }   // must match DEFAULT_AXIS_STEPS_PER_UNIT (RF Repetier XY 32: smoother but ~30 kHz at 200 mm/s)
@@ -4372,6 +4372,6 @@
   // Boot screen like the Klipper display (rf_display.cfg: rf_splash, _RF_INFO)
   #define RF_BOOTSCREEN
   #define RF_BOOT_TITLE   "3D-Artmaker"
-  #define RF_BOOT_VERSION "v1.0.10"   // Marlin-RFxxxx release
+  #define RF_BOOT_VERSION "v1.0.11"   // Marlin-RFxxxx release
   #define RF_BOOT_STAND   "20.11.2026"
 #endif
