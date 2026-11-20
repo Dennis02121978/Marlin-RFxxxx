@@ -2114,12 +2114,12 @@
  *
  * See https://marlinfw.org/docs/features/lin_advance.html for full instructions.
  */
-//#define LIN_ADVANCE
+#define LIN_ADVANCE   // RF: like RF Repetier USE_ADVANCE (there EXT0_ADVANCE_L 0 = off). Set K with M900 K.. (start G-code) or menu
 #if ENABLED(LIN_ADVANCE)
   #if ENABLED(DISTINCT_E_FACTORS)
-    #define ADVANCE_K { 0.22 }    // (mm) Compression length per 1mm/s extruder speed, per extruder
+    #define ADVANCE_K { 0.0 }     // (mm) Compression length per 1mm/s extruder speed, per extruder
   #else
-    #define ADVANCE_K 0.22        // (mm) Compression length applying to all extruders
+    #define ADVANCE_K 0.0         // (mm) RF: 0 = off until M900 K (direct drive RF hotend: about 0.02..0.2, calibrate in Orca)
   #endif
   //#define ADVANCE_K_EXTRA       // Add a second linear advance constant, configurable with M900 L.
   //#define LA_DEBUG              // Print debug information to serial during operation. Disable for production use.
@@ -4352,6 +4352,6 @@
   // Boot screen like the Klipper display (rf_display.cfg: rf_splash, _RF_INFO)
   #define RF_BOOTSCREEN
   #define RF_BOOT_TITLE   "3D-Artmaker"
-  #define RF_BOOT_VERSION "v1.0.7"   // Marlin-RFxxxx release
-  #define RF_BOOT_STAND   "19.11.2026"
+  #define RF_BOOT_VERSION "v1.0.8"   // Marlin-RFxxxx release
+  #define RF_BOOT_STAND   "20.11.2026"
 #endif

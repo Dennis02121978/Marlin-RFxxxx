@@ -125,8 +125,9 @@ M84
 ```
 
 Hinweise dazu:
-- `M900` (Linear Advance) wirkt nur, wenn `LIN_ADVANCE` in Configuration_adv.h eingeschaltet ist. In den
-  Release-Builds ist es aus, `M900` meldet dann nur „Unknown command“.
+- `M900` (Linear Advance) ist ab v1.0.8 eingebaut, Standard K 0 = aus. K 1.45 ist für den Direktextruder des
+  RF viel zu hoch (Extruder stottert); üblich sind etwa 0.02 bis 0.2. K mit dem Orca-Kalibriertest
+  (Pressure Advance) bestimmen und den Wert dann in `M900 K..` eintragen.
 - Mit `M82` (absolut) fördern `G1 E8` und `G1 E10` weiter vor (je 3 bzw. 2 mm), sie ziehen nicht zurück.
   Ein echter Retract nach `G1 E5` wäre `G1 E3`, das Zurückschieben `G1 E5` (so schreibt es der Config Creator).
 - Dual: `M104 S0` schaltet nur die aktive Düse ab. Sicherer: `M104 S0 T0` und `M104 S0 T1`.
