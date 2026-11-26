@@ -119,7 +119,7 @@
  *              X single  X dual  Y    Z    Z below switch  T1 offset X / Y
  *   RF1000       240      200   245  200       0.8            33.9 / 0.1
  *   RF2000       240      200   245  200       1.3            33.9 / 0.1
- *   RF2000 v2    230      170   290  185       3.0            33.6 / 0.0
+ *   RF2000 v2    230      170   290  180       3.0            33.6 / 0.0
  */
 #define RF_MODEL_RF1000   1
 #define RF_MODEL_RF2000   2
@@ -206,7 +206,7 @@
     #define RF_Y_MAX   290
   #endif
   #ifndef RF_Z_MAX
-    #define RF_Z_MAX   185
+    #define RF_Z_MAX   180   // Z max switch at about Z 184 (RF Repetier: 185)
   #endif
   #define RF_T1_DEFAULT_X 33.6
   #define RF_T1_DEFAULT_Y 0.0

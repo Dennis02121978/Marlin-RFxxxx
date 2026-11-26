@@ -4375,6 +4375,6 @@
   // Boot screen like the Klipper display (rf_display.cfg: rf_splash, _RF_INFO)
   #define RF_BOOTSCREEN
   #define RF_BOOT_TITLE   "3D-Artmaker"
-  #define RF_BOOT_VERSION "v1.0.12"   // Marlin-RFxxxx release
+  #define RF_BOOT_VERSION "v1.0.13"   // Marlin-RFxxxx release
   #define RF_BOOT_STAND   "20.11.2026"
 #endif

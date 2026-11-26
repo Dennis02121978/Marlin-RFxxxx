@@ -33,7 +33,7 @@ gehomt wird X, Y, Z nach min. G-Codes fahren nie unter Z=0; die Z-Tasten dürfen
 
 - RF1000: X 240 (Dual 200, beide am Drucker gemessen; Repetier 245), Y 245, Z 200, Überfahrweg Z 0,8 mm, Düse 2 X 33,9 / Y 0,1
 - RF2000: X 240 (Dual 200, beide am Drucker gemessen; Repetier 230), Y 245, Z 200, Überfahrweg Z 1,3 mm, Düse 2 X 33,9 / Y 0,1
-- RF2000 v2: X 230 (Dual 170), Y 290, Z 185, Überfahrweg Z 3,0 mm, Düse 2 X 33,6 / Y 0
+- RF2000 v2: X 230 (Dual 170), Y 290, Z 180 (ab v1.0.13, vorher 185; der Z-Max-Schalter löst bei etwa Z 184 aus), Überfahrweg Z 3,0 mm, Düse 2 X 33,6 / Y 0
 
 Dual: Der X-Schalter liegt bei X = −Versatz Düse 2 (Repetier fährt T0 nach dem Homing dorthin), damit beide
 Düsen X 0 … X max erreichen; T1 darf bis X max + Versatz. Homing 80/80/9 mm/s, zweites Anfahren mit 1/20
