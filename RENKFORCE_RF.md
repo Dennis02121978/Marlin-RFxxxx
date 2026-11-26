@@ -38,8 +38,25 @@ gehomt wird X, Y, Z nach min. G-Codes fahren nie unter Z=0; die Z-Tasten dürfen
 Dual: Der X-Schalter liegt bei X = −Versatz Düse 2 (Repetier fährt T0 nach dem Homing dorthin), damit beide
 Düsen X 0 … X max erreichen; T1 darf bis X max + Versatz. Homing 80/80/9 mm/s, zweites Anfahren mit 1/20
 (Repetier `HOMING_FEEDRATE_*_PRINT`, `ENDSTOP_*_BACK_MOVE`, `ENDSTOP_*_RETEST_REDUCTION_FACTOR`).
-Die Koordinaten der Z-Matrix im 24C256 sind damit dieselben wie in Marlin. M3079 (Objekt ausgeben) fährt wie
-Repetier auf Z max und Y 245.
+Die Koordinaten der Z-Matrix im 24C256 sind damit dieselben wie in Marlin. M3079 (Objekt ausgeben) fährt das
+Bett nach unten (RF2000 / v2 bis zum Z-Max-Schalter, RF1000 bis Z max − 10) und auf Y 245.
+
+## Z-Max-Endschalter (RF2000 / RF2000 v2)
+
+Am unteren Ende der Z-Achse sitzt ein zweiter Schalter (`Z_MAX_PIN` 16 = PH1, low-aktiv mit Pull-up wie in der
+RF-Repetier-Firmware). Ab v1.0.12 ist er eingeschaltet (`USE_ZMAX_PLUG`, nicht beim RF1000):
+
+- Ist er ausgelöst, fährt das Bett nicht weiter nach unten, auch nicht beim Anheben vor `G28`. Vorher ratterte
+  der Motor, wenn der Tisch beim Referenzieren schon unten stand.
+- Fahrten nach unten ab Z 150 (`RF_Z_MAX_GUARD_HEIGHT`) laufen mit eingeschaltetem Endschalter: erst Z, dann
+  X/Y/E auf der erreichten Höhe. Marlin übernimmt die Position vom Motor. Im Druck bleiben Schritte bis 1 mm
+  normale Fahrten.
+- Z-Taste nach unten: Der Schalter stoppt die Fahrt.
+- `M3079` fährt bis zum Schalter, höchstens bis Z 210 (`RF_Z_MAX_SEEK`, Repetier `G1 Z210`).
+
+**Vor der ersten Fahrt:** `M119` muss bei freiem Schalter `z_max: open` melden und bei gedrücktem
+`z_max: TRIGGERED`. Sonst `M3079` nicht benutzen, das Bett führe bis Z 210. In Marlin ist der Schalter
+noch nicht am Drucker getestet (Pin und Logik sind dieselben wie in Klipper am RF2000 v2).
 
 ## Geschwindigkeit und Beschleunigung
 
@@ -127,6 +144,7 @@ Serielle Verbindung zum Host **250000 Baud** (bis v1.0.3: 115200). Flashen über
 | `FEATURE_ZERO_DIGITS` | DMS wird bei Druckstart genullt |
 | Gehäuselüfter `M3120/M3121`, FETs `M3300`, 230V `M3301` | wie Repetier |
 | Ausgeben `M3079`, `M3060`, `M3070` | vorhanden |
+| Z-Max-Endschalter (RF2000 / v2) | ab v1.0.12, siehe oben |
 | SD-Karte im Drucker | Marlin `SDSUPPORT` |
 
 Nicht übertragen: Fräsmodus/Werkstück-Scan, `M3901`/`M3902`, `M3912`–`M3914`, `M3939`, `M3309`,

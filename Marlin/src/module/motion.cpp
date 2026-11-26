@@ -32,6 +32,9 @@
 #include "../gcode/gcode.h"
 #include "../lcd/marlinui.h"
 #include "../inc/MarlinConfig.h"
+#if ENABLED(RENKFORCE_RF)
+  #include "../feature/renkforce/renkforce.h"
+#endif
 
 #if IS_SCARA
   #include "../libs/buzzer.h"
@@ -627,7 +630,12 @@ void do_blocking_move_to(NUM_AXIS_ARGS_(const_float_t) const_feedRate_t fr_mm_s/
   #else
 
     #if HAS_Z_AXIS  // If Z needs to raise, do it before moving XY
-      if (current_position.z < z) { current_position.z = z; line_to_current_position(z_feedrate); }
+      if (current_position.z < z) {
+        #if ENABLED(RENKFORCE_RF) && USE_Z_MAX
+          if (rf.z_down_needs_guard(z, false)) rf.z_down_guarded(z, z_feedrate); else
+        #endif
+        { current_position.z = z; line_to_current_position(z_feedrate); }
+      }
     #endif
 
     current_position.set(TERN_(HAS_X_AXIS, x) OPTARG(HAS_Y_AXIS, y)); line_to_current_position(xy_feedrate);
@@ -1438,6 +1446,14 @@ void prepare_line_to_destination() {
     }
 
   #endif // PREVENT_COLD_EXTRUSION || PREVENT_LENGTHY_EXTRUDE
+
+  #if ENABLED(RENKFORCE_RF) && USE_Z_MAX
+    // Bed down: Z first, watched by the Z max switch, then XY / E at the height reached
+    if (rf.z_down_needs_guard(destination.z, destination.x != current_position.x || destination.y != current_position.y)) {
+      rf.z_down_guarded(destination.z, MMS_SCALED(feedrate_mm_s));
+      destination.z = current_position.z;
+    }
+  #endif
 
   if (TERN0(DUAL_X_CARRIAGE, dual_x_carriage_unpark())) return;
 

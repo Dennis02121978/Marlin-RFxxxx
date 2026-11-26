@@ -20,6 +20,8 @@ DRV8711-Treiber, DMS/Wägezelle). Single oder Dual Extruder.
 - Notfall-Pause, Sense Offset, Digit-Flow-Kompensation (`M3075`, `M3909`, `M3911`)
 - Z-Tasten, E-Tasten, Pause/Fortsetzen, Gehäuselüfter, 230V- und 24V-Ausgänge
 - RGB-Licht wie Repetier (Aus/Weiß/Auto/Manuell, `M3303`–`M3308`)
+- RF2000 / RF2000 v2 (ab v1.0.12): Der untere Z-Endschalter wird ausgewertet. Das Bett fährt nie weiter als bis
+  zum Schalter, „Objekt ausgeben“ fährt genau bis dorthin. **Vorher mit `M119` testen** (siehe [RENKFORCE_RF.md](RENKFORCE_RF.md#z-max-endschalter-rf2000--rf2000-v2))
 
 Technische Beschreibung: [RENKFORCE_RF.md](RENKFORCE_RF.md).
 
@@ -124,7 +126,7 @@ M107
 G91
 G1 E-2 F1800
 G90
-M3079            ; Objekt ausgeben (Bett nach unten)
+M3079            ; Objekt ausgeben (Bett nach unten, RF2000 / v2 bis zum unteren Z-Schalter)
 M84
 ```
 

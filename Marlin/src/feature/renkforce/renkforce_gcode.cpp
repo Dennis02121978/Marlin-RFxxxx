@@ -217,7 +217,13 @@ bool rf_process_mcode(const uint16_t code) {
 
     case 3079:   // output the object like RF Repetier OUTPUT_OBJECT_SCRIPT_PRINT: bed down, then Y 245
       if (all_axes_trusted()) {
-        do_blocking_move_to_z(_MAX(current_position.z, float(RF_OUTPUT_OBJECT_Z)), homing_feedrate(Z_AXIS));
+        #if USE_Z_MAX
+          // down to the Z max switch, never further
+          if (!rf.z_down_guarded(RF_Z_MAX_SEEK, homing_feedrate(Z_AXIS)))
+            SERIAL_ECHOLNPGM("M3079: Z max switch not reached, check it with M119");
+        #else
+          do_blocking_move_to_z(_MAX(current_position.z, float(RF_OUTPUT_OBJECT_Z)), homing_feedrate(Z_AXIS));
+        #endif
         do_blocking_move_to_xy(current_position.x, float(RF_OUTPUT_OBJECT_Y), homing_feedrate(Y_AXIS));
       }
       break;

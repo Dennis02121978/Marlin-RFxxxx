@@ -177,6 +177,7 @@ class Endstops {
     }
 
     static bool global_enabled() { return enabled_globally; }
+    static bool is_enabled() { return enabled; }
 
     /**
      * Periodic call to poll endstops if required. Called from temperature ISR

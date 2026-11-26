@@ -611,6 +611,50 @@ void Renkforce::change_microsteps(const uint8_t d, const uint16_t ms) {
 }
 
 //
+// Z max switch at the lower end of the table (RF2000 / RF2000 v2)
+//
+#if USE_Z_MAX
+
+  bool Renkforce::z_max_hit() { return READ(Z_MAX_PIN) != Z_MAX_ENDSTOP_INVERTING; }
+
+  // Does a move to this Z have to be watched? Z only grows when the bed moves down.
+  bool Renkforce::z_down_needs_guard(const_float_t z, const bool xy_move) {
+    const float dist = z - current_position.z;
+    if (dist <= 0.000001f) return false;
+    if (z_max_hit()) return true;
+    if (!axis_is_trusted(Z_AXIS)) return true;        // e.g. the Z raise of G28
+    if (z <= RF_Z_MAX_GUARD_HEIGHT) return false;
+    // Small steps with XY (leveling) or while printing (layer change) stay normal moves
+    return !(dist <= 1.0f && (xy_move || printingIsActive()));
+  }
+
+  // Z only move down with the endstops on. Stops at the switch and takes over the position.
+  bool Renkforce::z_down_guarded(const_float_t z, const_feedRate_t fr_mm_s) {
+    planner.synchronize();
+    if (z <= current_position.z) return z_max_hit();
+    bool hit = z_max_hit();
+    if (!hit) {
+      const bool was_enabled = endstops.is_enabled();
+      endstops.hit_on_purpose();
+      endstops.enable(true);
+      current_position.z = z;
+      line_to_current_position(fr_mm_s);
+      planner.synchronize();
+      hit = endstops.trigger_state() != 0;
+      if (hit) {
+        endstops.hit_on_purpose();
+        set_current_from_steppers_for_axis(Z_AXIS);
+        sync_plan_position();
+      }
+      endstops.enable(was_enabled);
+    }
+    if (hit) SERIAL_ECHOLNPGM("Z max switch reached at Z", current_position.z);
+    return hit;
+  }
+
+#endif // USE_Z_MAX
+
+//
 // Keys next to the display
 //
 //
@@ -621,6 +665,9 @@ void Renkforce::z_drive_start(const int8_t dir) {
     if (gcode.busy_state != GcodeSuite::NOT_BUSY && gcode.busy_state != GcodeSuite::PAUSED_FOR_USER) return;
   #endif
   if (planner.has_blocks_queued()) return;
+  #if USE_Z_MAX
+    if (dir > 0 && z_max_hit()) { LCD_MESSAGE_F("Z unten am Schalter"); return; }
+  #endif
   float target;
   if (axis_is_trusted(Z_AXIS)) {
     if (dir < 0) {
@@ -637,6 +684,10 @@ void Renkforce::z_drive_start(const int8_t dir) {
     z_endstops = dir < 0;
     if (z_endstops) endstops.enable(true);
   }
+  #if USE_Z_MAX
+    // bed down: the Z max switch stops the move (z_drive_stop takes over the position)
+    if (dir > 0 && !z_endstops) { z_endstops = true; endstops.enable(true); }
+  #endif
   if (ABS(target - current_position.z) < 0.0005f) return;
   current_position.z = target;
   line_to_current_position(homing_feedrate(Z_AXIS));
@@ -662,6 +713,9 @@ bool Renkforce::jog(const AxisEnum axis, const float dist, const feedRate_t fr_m
 
   if (axis == Z_AXIS) {
     if (!axis_is_trusted(Z_AXIS)) { LCD_MESSAGE_F("Zuerst Z referenzieren"); return false; }
+    #if USE_Z_MAX
+      if (dist > 0 && z_max_hit()) { LCD_MESSAGE_F("Z unten am Schalter"); return false; }
+    #endif
     float target = current_position.z + dist;
     LIMIT(target, -float(RF_SCAN_Z_DRIVE_OVER), float(Z_MAX_POS) - 0.5f);   // RF Repetier: keys may go below Z=0
     if (ABS(target - current_position.z) < 0.0005f) return false;

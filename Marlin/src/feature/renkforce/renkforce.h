@@ -107,6 +107,13 @@ public:
   static xy_pos_t scan_grid_spacing();
   static void sense_disable();
 
+  #if USE_Z_MAX
+    // Z max switch (lower end of the table): the bed never moves further down
+    static bool z_max_hit();
+    static bool z_down_needs_guard(const_float_t z, const bool xy_move);
+    static bool z_down_guarded(const_float_t z, const_feedRate_t fr_mm_s);   // true: switch reached
+  #endif
+
 private:
   static void handle_keys(const millis_t ms);
   static void handle_sample();
